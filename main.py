@@ -3,11 +3,12 @@ from pathlib import Path
 import os
 
 
+
 print("Aktuelles Verzeichnis:", os.getcwd())
 print("Dateien:", os.listdir('.'))
 pdf_name = "testrechnung.pdf"
 pdf_name_2 = "test.pdf"
-pdf_path = Path(pdf_name)  # ← In Path umwandeln!
+pdf_path = Path(pdf_name)  # In Path umwandeln!
 
 # Prüfe ob Datei existiert und lesbar ist
 if pdf_path.exists():
@@ -15,9 +16,8 @@ if pdf_path.exists():
         print(f"Datei gefunden und lesbar: {pdf_path}")
         reader = PDFReader(pdf_path)
         
-        # Jetzt erst die Methoden aufrufen!
         print(f"Seitenanzahl: {reader.get_page_count()}")
-        print("\n" + "="*50 + "\n")
+        print("\n" + "="*50 + "\n") #=========================================
         
         # Erste Seite lesen
         print("ERSTE SEITE:")

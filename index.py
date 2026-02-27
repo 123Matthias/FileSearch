@@ -1,7 +1,11 @@
+
+
 import ttkbootstrap as ttk
 from tkinter import filedialog
 import os
+from Service.explorer_service import list_files
 from card import create_card
+
 
 class MeineApp:
     def __init__(self):
@@ -22,12 +26,13 @@ class MeineApp:
         self.keywords.pack(side="left", fill="x", expand=True)
         self.keywords.bind("<Return>", self.suchen)
 
-        # Pfad
+        # Pfad-
         self.pfad_label = ttk.Label(self.root, text="Kein Pfad gewählt", bootstyle="light")
         self.pfad_label.pack(pady=(10, 5))
 
         self.btn = ttk.Button(self.root, text="search-path", command=self.datei_oeffnen)
         self.btn.pack(pady=(0, 10))
+
 
         # ===== Results (Scroll-Container) =====
         self.results_wrap = ttk.Frame(self.root)
@@ -37,15 +42,15 @@ class MeineApp:
         self.scrollbar = ttk.Scrollbar(self.results_wrap, orient="vertical", command=self.canvas.yview)
         self.scrollable = ttk.Frame(self.canvas)
 
-        self.scrollable.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
         self.canvas.create_window((0, 0), window=self.scrollable, anchor="nw")
         self.canvas.configure(yscrollcommand=self.scrollbar.set)
 
         self.canvas.pack(side="left", fill="both", expand=True)
         self.scrollbar.pack(side="right", fill="y")
+        
         # ================================================
 
-
+        """"
         # Beispiel-Cards
         for i in range(20):
             create_card(
@@ -53,8 +58,17 @@ class MeineApp:
                 f"example_{i}.txt",
                 "… hier stehen 40 Zeichen vor dem Treffer und 40 Zeichen nach dem Treffer …"
             )
+        """
+        self.scrollable.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
 
- 
+
+        self.root.bind_all("<MouseWheel>", self._on_mousewheel)      # Windows / macOS
+        self.root.bind_all("<Button-4>", self._on_mousewheel)       # Linux
+        self.root.bind_all("<Button-5>", self._on_mousewheel)
+
+
+
+
         self.root.mainloop()
 
     def clear_results(self):
@@ -103,29 +117,59 @@ class MeineApp:
             self.basis_pfad = pfad
 
     def suchen(self, event=None):
-        keyword = self.keywords.get().strip()
+        """Wird bei Enter im Suchfeld ausgeführt"""
+        keywords = self.keywords.get()
+        
+        # Prüfen ob ein Pfad ausgewählt wurde
+        if not getattr(self, "basis_pfad", None):
+            print("Kein Pfad ausgewählt")
+            return
+        
+        if not keywords:
+            print("Kein Suchbegriff eingegeben")
+          
+        
+        # Alte Ergebnisse löschen
         self.clear_results()
+        
+        # Dateien mit ExplorerService auflisten
+        dateien = list_files(self.basis_pfad, keywords, recursive=True)
+        
+        # Für jede Datei eine Card erstellen (vorerst nur Platzhalter-Text)
+        for dateipfad in dateien[:50]:  # Erste 50 Dateien als Beispiel
+            dateiname = os.path.basename(dateipfad)
+            
+            # Hier kommt später die Snippet-Logik rein
+            platzhalter_text = f"Datei gefunden unter: {dateipfad}"
+            
+            # Card erstellen
+            create_card(
+                self.scrollable,
+                dateiname,           # Title = Dateiname
+                platzhalter_text     # Body = Platzhalter
+            )
+        
+        # Info anzeigen wie viele Dateien gefunden wurden
+        if hasattr(self, 'ergebnis_label'):
+            self.ergebnis_label.configure(
+                text=f"{len(dateien)} Dateien gefunden. Zeige erste 50.",
+                bootstyle="info"
+            )
 
-        if not getattr(self, "basis_pfad", None) or not keyword:
+    def _on_mousewheel(self, event):
+        x, y = self.root.winfo_pointerxy()
+        widget = self.root.winfo_containing(x, y)
+
+        # nur scrollen, wenn Maus über Results-Bereich ist
+        if widget is None or not str(widget).startswith(str(self.results_wrap)):
             return
 
-        for root, _, files in os.walk(self.basis_pfad):
-            for name in files:
-                if not name.lower().endswith((".txt", ".md", ".py")):
-                    continue
-
-                pfad = os.path.join(root, name)
-                try:
-                    with open(pfad, "r", encoding="utf-8", errors="ignore") as f:
-                        content = f.read()
-                except:
-                    continue
-
-                snippet = self.make_snippet(content, keyword, ctx=40)
-                if snippet:
-                    self.add_result(name, snippet, pfad)
-
+        if event.delta:
+            self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+        elif event.num == 4:
+            self.canvas.yview_scroll(-1, "units")
+        elif event.num == 5:
+            self.canvas.yview_scroll(1, "units")
 
 if __name__ == "__main__":
-    import sys
     MeineApp()
