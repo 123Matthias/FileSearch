@@ -1,9 +1,9 @@
 import PyPDF2
 from pathlib import Path
 
-class PDFReader:
-    def __init__(self, pdf_path):
-        self.pdf_path = Path(pdf_path)
+class PdfReaderService:
+    def __init__(self, path):
+        self.pdf_path = Path(path)
         
     def read_all_pages(self):
         """Liest alle Seiten des PDFs"""
