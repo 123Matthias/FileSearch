@@ -13,6 +13,7 @@ Eine Anwendung zum rekursiven Durchsuchen von Dateiinhalten in einem ausgewählt
 - **Terminal** - print() wird in Console in GUI übergeben
 - **Dateiformate** - können nach Belieben eingebaut werden vorerst alles was textract unterstützt
 - **Suchtreffer** - Treffer im Dateinamen werden nicht im Inhalt durchsucht. Diese werden übersprungen
+- **Multiprocessing und Multithreading** - für schnelles Suchen
 
 ## Screenshot App Main Page
 ![exampleApp.png](exampleApp.png)
