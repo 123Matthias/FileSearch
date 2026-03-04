@@ -12,20 +12,40 @@ from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve, Signal, QObject
 from PySide6.QtGui import QFont, QPalette, QColor, QIcon, QPainter, QBrush, QLinearGradient, QKeySequence, QShortcut
 from PySide6.QtWidgets import QApplication
 from Service.explorer_service import ExplorerService
+
 from View.gui_console import GUIConsole
+
+from Service.font_awesome_service import FontAwesomeService
 
 
 class AnimatedToggle(QPushButton):
-    """Animierter Toggle-Button für die Konsole"""
-
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setCheckable(True)
         self.setFixedSize(40, 40)
         self._color = QColor("#00bc8c")
-        self._animation = QPropertyAnimation(self, b"color")
-        self._animation.setDuration(200)
-        self._animation.setEasingCurve(QEasingCurve.InOutQuad)
+
+
+        self.setStyleSheet(f"""
+            QPushButton {{
+                background-color: #2c2c2c;
+                border: 2px solid #3c3c3c;
+                border-radius: 20px;
+                font-family: "Font Awesome 7";  /* ← Echter Font-Name */
+                font-size: 16px;
+                color: white;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: #3c3c3c;
+                border: 2px solid #00bc8c;
+            }}
+            QPushButton:pressed {{
+                background-color: #1c1c1c;
+            }}
+        """)
+
+        # ... rest gleich ...
 
     def get_color(self):
         return self._color
@@ -36,25 +56,28 @@ class AnimatedToggle(QPushButton):
 
     color = Property(QColor, get_color, set_color)
 
+    def _on_toggled(self, checked):
+        self._animation.stop()
+        self._animation.setStartValue(self._color)
+        self._animation.setEndValue(
+            QColor("#f39c12") if checked else QColor("#00bc8c")
+        )
+        self._animation.start()
+
+        # Icon wechseln
+        self.setText("\uf410" if checked else "\uf120")
+
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
-        # Zeichne den Kreis-Hintergrund
+        # Animierten Hintergrund
         painter.setBrush(QBrush(self._color))
         painter.setPen(Qt.NoPen)
         painter.drawEllipse(4, 4, 32, 32)
 
-        # Zeichne das Symbol
-        painter.setPen(QColor("white"))
-        font = QFont("Arial", 16)
-        painter.setFont(font)
-        painter.drawText(self.rect(), Qt.AlignCenter, "⌘" if self.isChecked() else "⌃")
-
-    def toggle(self):
-        self._animation.setStartValue(self._color)
-        self._animation.setEndValue(QColor("#f39c12") if self.isChecked() else QColor("#00bc8c"))
-        self._animation.start()
+        painter.end()
+        super().paintEvent(event)  # Lässt das Icon vom Stylesheet zeichnen
 
 
 class SearchResultCard(QFrame):
@@ -192,10 +215,15 @@ class MainPage(QMainWindow):
 
     def toggle_console_shortcut(self):
         """Konsole via Shortcut umschalten"""
-        self.toggle_btn.setChecked(not self.toggle_btn.isChecked())
+        self.console_toggle_btn.setChecked(not self.console_toggle_btn.isChecked())
 
     def setup_header(self, parent_layout):
+
+
         """Moderner Header mit Suchfeld"""
+
+        service = FontAwesomeService()
+        font = service.load_font()
         header_widget = QWidget()
         header_layout = QHBoxLayout(header_widget)
         header_layout.setSpacing(10)
@@ -247,7 +275,7 @@ class MainPage(QMainWindow):
         header_layout.addWidget(self.keywords)
 
         # Choose Path Button mit Icon
-        self.btn = QPushButton("📁 Pfad auswählen")
+        self.btn = QPushButton()
         self.btn.setMinimumHeight(40)
         self.btn.setCursor(Qt.PointingHandCursor)
         self.btn.setStyleSheet("""
@@ -259,6 +287,7 @@ class MainPage(QMainWindow):
                 font-size: 14px;
                 color: white;
                 font-weight: bold;
+                font-family: "Font Awesome 7 Free";
             }
             QPushButton:hover {
                 background-color: #3c3c3c;
@@ -269,6 +298,8 @@ class MainPage(QMainWindow):
                 background-color: #1c1c1c;
             }
         """)
+
+        self.btn.setText("\uf07b")
         self.btn.clicked.connect(self.controller.choose_path)
         header_layout.addWidget(self.btn)
 
@@ -281,9 +312,10 @@ class MainPage(QMainWindow):
         progress_layout.setSpacing(10)
 
         # Animierter Toggle-Button
-        self.toggle_btn = AnimatedToggle()
-        self.toggle_btn.toggled.connect(self.toggle_console)
-        progress_layout.addWidget(self.toggle_btn)
+        self.console_toggle_btn = AnimatedToggle()
+        self.console_toggle_btn.setChecked(False)
+        self.console_toggle_btn.toggled.connect(self.toggle_console)
+        progress_layout.addWidget(self.console_toggle_btn)
 
         # Fortschrittsleiste
         self.progress_bar = QProgressBar()
@@ -356,6 +388,8 @@ class MainPage(QMainWindow):
 
         parent_layout.addWidget(self.splitter)
 
+        self.toggle_console(False) # Nachdem es den Splitter gibt soll er togglen damit Console unsichtbar ist.
+
     def setup_results_area(self):
         """Scrollbarer Bereich für Ergebnisse mit Empty State"""
         self.results_scroll = QScrollArea()
@@ -402,6 +436,7 @@ class MainPage(QMainWindow):
         self.results_layout.addWidget(self.empty_state_label)
 
         self.results_scroll.setWidget(self.results_container)
+
 
     def setup_console_area(self):
         """Konsolen-Bereich mit besseres Layout"""
@@ -465,11 +500,11 @@ class MainPage(QMainWindow):
         if checked:
             self.splitter.widget(1).show()
             self.console_visible = True
-            self.toggle_btn.setChecked(True)
+            self.console_toggle_btn.setChecked(True)
         else:
             self.splitter.widget(1).hide()
             self.console_visible = False
-            self.toggle_btn.setChecked(False)
+            self.console_toggle_btn.setChecked(False)
 
     def set_search_loading(self, is_loading: bool):
         """Loading-Status anzeigen/verstecken"""
