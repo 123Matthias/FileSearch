@@ -78,10 +78,10 @@ def process_single_file_static(dateipfad, keyword_list, reader, basis_pfad):
                 # Nur Kontext erstellen wenn nötig
                 kontext = make_body_text_static(text, keyword, ctx=150)
                 dateiname = os.path.basename(dateipfad)
-                rel_pfad = os.path.relpath(dateipfad, basis_pfad)
-                return ("content", dateiname, rel_pfad, keyword, kontext)
+                return ("content", dateiname, dateipfad, keyword, kontext)
 
     except Exception as e:
+
         print(f"❌ FEHLER in main_page_controller in Method process_single_file_static {e}")
     return None
 
@@ -235,7 +235,7 @@ class MainPageController(QObject):  # QObject für Signal-Support
                 dateiname = os.path.basename(dateipfad)
                 rel_pfad = os.path.relpath(dateipfad, self.view.basis_pfad)
                 # DIREKTES Signal - sofortige Anzeige!
-                self.add_result_signal.emit(dateiname, f"Fundort: {rel_pfad}", "filename", "")
+                self.add_result_signal.emit(dateiname, f"Fundort: {rel_pfad}", "filename", dateipfad)
 
             # Dateien für Content-Suche
             zu_pruefen = [f for f in all_files if f not in treffer_set]
@@ -300,11 +300,11 @@ class MainPageController(QObject):  # QObject für Signal-Support
                         elif msg[0] == 'treffer':
                             # 🔥 TREFFER-UPDATE: Hier werden Treffer aus der Queue geholt!
                             treffer = msg[1]  # Auspacken des Tuples: ('treffer', result)
-                            typ, dateiname, rel_pfad, keyword, kontext = treffer
+                            typ, dateiname, abs_pfad, keyword, kontext = treffer
 
                             # Formatiere und sende an GUI!
                             text = f"'{keyword}' gefunden\n...{kontext}..."
-                            self.add_result_signal.emit(dateiname, text, "content", rel_pfad)  # ✨ AN DIE GUI!
+                            self.add_result_signal.emit(dateiname, text, "content", abs_pfad)  # ✨ AN DIE GUI!
 
                     except:
                         pass

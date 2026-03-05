@@ -10,7 +10,8 @@ class Main:
     def __init__(self):
         self.main_page_controller = MainPageController()
         self.main_page = PySideMainPage(self.main_page_controller)
-        self.font_awesome_7 = FontAwesomeService.load_font()
+        self.font_awesome_7 = FontAwesomeService.load_font_awesome_free()
+        self.python_font = FontAwesomeService.load_python_selfmade()
 
     def run(self):
         """Startet die PySide6 App"""

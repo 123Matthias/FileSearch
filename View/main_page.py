@@ -9,7 +9,8 @@ from PySide6.QtWidgets import (
     QFrame, QSplitter, QSizePolicy
 )
 from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve, Signal, QObject, QTimer, Property
-from PySide6.QtGui import QFont, QPalette, QColor, QIcon, QPainter, QBrush, QLinearGradient, QKeySequence, QShortcut
+from PySide6.QtGui import QFont, QPalette, QColor, QIcon, QPainter, QBrush, QLinearGradient, QKeySequence, QShortcut, \
+    QPixmap
 from PySide6.QtWidgets import QApplication
 from Service.explorer_service import ExplorerService
 
@@ -50,10 +51,7 @@ class AnimatedToggle(QPushButton):
             }
         """)
 
-        # Start-Icon: Terminal öffnen ()
         self.setText("\uf120")
-
-
 
 
 
@@ -63,7 +61,7 @@ class SearchResultCard(QFrame):
     clicked = Signal(str)  # Signal mit dem Pfad
 
     def mousePressEvent(self, event):
-        # 🔥 Wenn Card geklickt wird, emittet sie den Pfad!
+        # Wenn Card geklickt wird, emittet sie den Pfad!
         self.clicked.emit(self.rel_path)
         super().mousePressEvent(event)
 
@@ -75,19 +73,19 @@ class SearchResultCard(QFrame):
         self._is_pressed = False
         self.rel_path = rel_path
 
-        # Schatten-Effekt durch Styling
+
         self.setStyleSheet("""
             #resultCard {
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                    stop:0 #2c2c2c, stop:1 #2a2a2a);
+                    stop:0 #1c1c1c, stop:1 #1a1a1a);
                 border: 1px solid #3c3c3c;
                 border-radius: 8px;
                 margin: 4px 0px;
+                max-width: 1200px;
             }
             #resultCard:hover {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                    stop:0 #3c3c3c, stop:1 #3a3a3a);
-                border: 1px solid #4c4c4c;
+                border-left: 3px solid #00bc8c;
+                
             }
         """)
 
@@ -145,7 +143,7 @@ class MainPage(QMainWindow):
         self.explorer_service = ExplorerService()
 
         # Fenster-Setup
-        self.setWindowTitle("OSWalk")
+        self.setWindowTitle("PyFinder")
         self.setMinimumSize(1000, 700)
 
         # Zentrales Widget und Hauptlayout
@@ -195,8 +193,6 @@ class MainPage(QMainWindow):
         self.console_toggle_btn.setChecked(not self.console_toggle_btn.isChecked())
 
     def setup_header(self, parent_layout):
-
-
         """Moderner Header mit Suchfeld"""
 
         header_widget = QWidget()
@@ -209,22 +205,34 @@ class MainPage(QMainWindow):
         title_layout.setSpacing(2)
         title_layout.setContentsMargins(0, 0, 0, 0)
 
-        os_label = QLabel("OS")
-        os_label.setStyleSheet("""
+        key_label = QLabel("Key")
+        key_label.setStyleSheet("""
             font-size: 36px;
             font-weight: bold;
             color: #00bc8c;
         """)
 
-        walk_label = QLabel("Walk")
-        walk_label.setStyleSheet("""
+        s_label = QLabel()
+        s_label.setPixmap(QPixmap("assets/Python.png").scaled(
+            36, 36,  # Größe anpassen (gleiche Höhe wie die Schrift)
+            Qt.KeepAspectRatio,  # Seitenverhältnis beibehalten
+            Qt.SmoothTransformation  # Glatte Skalierung
+        ))
+        s_label.setStyleSheet("""
+            width: 36px;
+            height: 36px;
+        """)
+
+        eek_label = QLabel("eek")
+        eek_label.setStyleSheet("""
             font-size: 36px;
             font-weight: bold;
             color: #f39c12;
         """)
 
-        title_layout.addWidget(os_label)
-        title_layout.addWidget(walk_label)
+        title_layout.addWidget(key_label)
+        title_layout.addWidget(s_label)
+        title_layout.addWidget(eek_label)
         title_layout.addStretch()
 
         header_layout.addWidget(title_widget)
@@ -246,7 +254,7 @@ class MainPage(QMainWindow):
 
         # Modernes Suchfeld
         self.keywords_input = QLineEdit()
-        self.keywords_input.setPlaceholderText("press enter")
+        self.keywords_input.setPlaceholderText("Suche starten mit Enter")
         self.keywords_input.setMinimumHeight(40)
 
         self.keywords_input.setStyleSheet("""
@@ -345,17 +353,35 @@ class MainPage(QMainWindow):
 
     def setup_path_label(self, parent_layout):
         """Pfad-Anzeige mit gekürzte langen Pfade"""
+
+        self.h_box_path = QHBoxLayout()
+        self.h_box_path.setAlignment(Qt.AlignCenter)
+
+        self.text_label = QLabel("Suchpfad: ")
         self.pfad_label = QLabel("Kein Pfad gewählt")
-        self.pfad_label.setAlignment(Qt.AlignCenter)
+
+        # Tippfehler korrigiert: px durch 0px ersetzt
+        self.text_label.setStyleSheet("""
+        QLabel {
+            font-size: 14px;
+            padding: 0px 0px 0px 0px;
+            margin: 0px 0px 0px 0px;
+            color: #b0b0b0;
+            }
+        """)
+
         self.pfad_label.setStyleSheet("""
+        QLabel {
             color: #b0b0b0;
             font-size: 14px;
-            padding: 10px;
-            background-color: #2c2c2c;
-            border-radius: 8px;
-            border-left: 3px solid #00bc8c;
+            padding: 0px 0px 0px 0px;
+            margin: 0px 0px 0px 0px;
+            }
         """)
-        parent_layout.addWidget(self.pfad_label)
+
+        self.h_box_path.addWidget(self.text_label)
+        self.h_box_path.addWidget(self.pfad_label)
+        parent_layout.addLayout(self.h_box_path)
 
     def setup_main_splitter(self, parent_layout):
         """Splitter für Ergebnisse und Konsole"""
@@ -420,18 +446,17 @@ class MainPage(QMainWindow):
         self.results_layout.setContentsMargins(10, 10, 10, 10)
 
         # Empty State Label (wird beim Hinzufügen von Ergebnissen versteckt)
-        self.empty_state_label = QLabel("🔍 Noch keine Suchergebnisse")
+        self.empty_state_label = QLabel("Noch keine Suchergebnisse...")
         self.empty_state_label.setAlignment(Qt.AlignCenter)
         self.empty_state_label.setStyleSheet("""
             color: #666666;
             font-size: 16px;
-            padding: 40px 20px;
+            padding: 40px auto;
             font-style: italic;
         """)
         self.results_layout.addWidget(self.empty_state_label)
 
         self.results_scroll.setWidget(self.results_container)
-
 
     def setup_console_area(self):
         """Konsolen-Bereich mit besseres Layout"""
@@ -510,16 +535,17 @@ class MainPage(QMainWindow):
         else:
             self.search_label.setVisible(False)
 
-    def add_result(self, title, body, treffer_typ, rel_pfad):
+    def add_result(self, title, body, treffer_typ, abs_path):
         """Ergebnis als moderne Karte hinzufügen"""
 
         def _add():
             # Verstecke Empty State beim ersten Ergebnis
             if self.result_count == 0:
                 self.empty_state_label.setVisible(False)
-
-            card = SearchResultCard(title, body, treffer_typ, rel_pfad)
-            card.clicked.connect(lambda path: self.open_file(path))
+            print(f"DEBUG PATH: {abs_path}")
+            # Ausgabe: DEBUG PATH: Linser/datei.pdf
+            card = SearchResultCard(title, body, treffer_typ, abs_path)
+            card.clicked.connect(lambda path=abs_path: self.open_file(path))
             self.results_layout.addWidget(card)
             self.result_count += 1
 
@@ -536,28 +562,29 @@ class MainPage(QMainWindow):
         import unicodedata
         import os
 
-        print(path)
-        # Normalisierung direkt auf den Eingabe-String
-        normalized_path = unicodedata.normalize('NFD', path)
+        # RICHTIG: Path-Objekt erstellen und absolut machen
+        path = Path(path).resolve()  # oder .absolute()
 
-        # Dann absoluten Pfad bauen
-        abs_path = Path(normalized_path).expanduser().resolve()
+        print(f"Absoluter Pfad: {path}")
 
-        if not abs_path.is_file():
-            print(f"❌ Datei existiert nicht: {abs_path}")
+        # Prüft ob etwas existiert (Datei ODER Verzeichnis)
+        if not path.exists():
+            print(f"❌ Pfad existiert nicht: {path}")
             return
 
         try:
-            if platform.system() == "Darwin":
-                subprocess.run(["open", str(abs_path)])
+            if platform.system() == "Darwin":  # macOS
+                subprocess.run(["open", str(path)])
             elif platform.system() == "Windows":
-                os.startfile(str(abs_path))
-            else:
-                subprocess.run(["xdg-open", str(abs_path)])
+                os.startfile(str(path))
+            else:  # Linux
+                subprocess.run(["xdg-open", str(path)])
 
-            print(f"✅ Öffne Datei: {abs_path}")
+            print(f"✅ Öffne: {path}")
         except Exception as e:
             print(f"❌ Fehler beim Öffnen: {e}")
+
+
 
     def clear_results(self):
         """Alle Ergebnisse löschen"""
@@ -621,8 +648,8 @@ class PySideMainPage:
     def run(self):
         return self.app.exec()
 
-    def add_result(self, title, body, treffer_typ, rel_pfad):
-        self.window.add_result(title, body, treffer_typ, rel_pfad)
+    def add_result(self, title, body, treffer_typ, abs_path):
+        self.window.add_result(title, body, treffer_typ, abs_path)
 
     def clear_results(self):
         self.window.clear_results()
