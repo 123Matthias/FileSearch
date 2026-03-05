@@ -2,6 +2,7 @@
 
 Suchmaschine für den PC.
 Eine Anwendung zum rekursiven Durchsuchen von Dateiinhalten in einem ausgewählten Ordner.
+Ein Release zum Installieren sollte es bis 04 2026 geben.
 
 ## Features
 
@@ -15,5 +16,16 @@ Eine Anwendung zum rekursiven Durchsuchen von Dateiinhalten in einem ausgewählt
 - **Suchtreffer** - Treffer im Dateinamen werden nicht im Inhalt durchsucht. Diese werden übersprungen
 - **Multiprocessing und Multithreading** - für schnelles Suchen
 
+## TODOs bis Release
+- neue PySide GUI sauber fertigstellen
+- print Terminal Ausgaben unvollständig
+- onClick open File hat noch Fehler
+- Code Review und Kommentierung
+- Keyword Suche hat noch kein Ranking beste treffer oben ...
+- Wenn nur ein Keyword im Filename gefunden wird und es gibt mehrere, dann dennoch Inhalt mitdurchsuchen
+
 ## Screenshot App Main Page
+### PySide (enthällt auch QSS zum Stylen) und wird für die App jetzt verwendet
+![PySideDesign.png](PySideDesign.png)
+### bootstrapttk Design wird nicht mehr verwendet für die App
 ![exampleApp.png](exampleApp.png)
