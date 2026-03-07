@@ -88,6 +88,7 @@ class SearchResultCard(QFrame):
                 border-radius: 8px;
                 margin: 4px 0px;
                 max-width: 1200px;
+                min-width: 600px;
             }
             #resultCard:hover {
                 border-left: 3px solid #00bc8c;
@@ -114,9 +115,9 @@ class SearchResultCard(QFrame):
         badge = QLabel(treffer_typ.upper())
         badge.setStyleSheet("""
             background-color: none;
-            color: white;
+            color: #00bc8c;
             padding: 2px 8px;
-            border-radius: 10px;
+            border-radius: 4px;
             font-size: 11px;
             font-weight: bold;
         """)
@@ -131,7 +132,7 @@ class SearchResultCard(QFrame):
         self.body_label.setStyleSheet("""
             color: #b0b0b0;
             font-size: 13px;
-            padding: 4px 0px;
+            padding: 4px 4px;
             background-color: none;
         """)
         layout.addWidget(self.body_label)
