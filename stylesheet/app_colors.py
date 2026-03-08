@@ -8,11 +8,13 @@ class DarkColors:
         MAIN = QColor("#00bc8c")  # Hauptakzentfarbe - Hellgrün
         LIGHT = QColor("#4eedb8")  # Helle Variante - Mintgrün
         DARK = QColor("#008c64")  # Dunkle Variante - Waldgrün
+        CLICKED = QColor("#9b59b6")  # Lila/Violett für geklickte Links
 
     class Secondary:
         MAIN = QColor("#f39c12")  # Sekundäre Akzentfarbe - Orange
         LIGHT = QColor("#ffcd4a")  # Helle Variante - Hellorange/Gelb
         DARK = QColor("#bb6e00")  # Dunkle Variante - Dunkelorange/Braun
+        CLICKED = QColor("#8e44ad")  # Dunkleres Lila für sekundäre Elemente
 
     class UI:
         INPUT_BG = QColor("#2c2c2c")  # Input Hintergrund - Dunkelgrau
@@ -42,11 +44,13 @@ class LightColors:
         MAIN = QColor("#006650")  # Hauptakzentfarbe - Dunkelgrün (vorher #00bc8c)
         LIGHT = QColor("#4eedb8")  # Helle Variante - Mintgrün
         DARK = QColor("#006644")  # Noch dunkler - Tannengrün
+        CLICKED = QColor("#9b59b6")  # Lila/Violett für geklickte Links
 
     class Secondary:
         MAIN = QColor("#c45c00")  # Sekundäre Akzentfarbe - Rostorange (vorher #f39c12)
         LIGHT = QColor("#ffcd4a")  # Helle Variante - Hellgelb
         DARK = QColor("#bb6e00")  # Dunkle Variante - Goldbraun
+        CLICKED = QColor("#6c228c")  # Dunkleres Lila für sekundäre Elemente
 
     class UI:
         INPUT_BG = QColor("#ffffff")  # Weiß - Input Hintergrund

@@ -7,11 +7,11 @@ from pathlib import Path
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QLabel, QLineEdit, QProgressBar, QScrollArea,
-    QFrame, QSplitter, QSizePolicy, QGraphicsDropShadowEffect
+    QFrame, QSplitter, QSizePolicy, QGraphicsDropShadowEffect, QSpinBox
 )
 from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve, Signal, QObject, QTimer, Property
 from PySide6.QtGui import QFont, QPalette, QColor, QIcon, QPainter, QBrush, QLinearGradient, QKeySequence, QShortcut, \
-    QPixmap
+    QPixmap, QIntValidator
 from PySide6.QtWidgets import QApplication
 
 from Controller.main_page_controller import MainPageController
@@ -93,6 +93,7 @@ class SearchResultCard(QFrame):
         self.setCursor(Qt.PointingHandCursor)
         self.rel_path = rel_path
         self.priority = priority
+        self.checked = False
 
         # RICHTIG: Als Observer registrieren
         self.theme_manager = ThemeManager()
@@ -102,19 +103,32 @@ class SearchResultCard(QFrame):
         self.colors = self.theme_manager.get_colors()
 
 
+
         layout = QVBoxLayout(self)
         layout.setSpacing(8)
 
         # Titel
         title_layout = QHBoxLayout()
         self.title_label = QLabel()
+        self.title_label.setObjectName("titleLabel") # WICHTIG wegen css selektor ID unten bei hover Card
         self.title_label.setTextFormat(Qt.RichText)
         self.title_label.setText(self.highlight_words(title))
+
         title_layout.addWidget(self.title_label)
         title_layout.addStretch()
 
-        badge = QLabel(treffer_typ.upper())
-        title_layout.addWidget(badge)
+        # Berechne den Wert (z.B. 3/5 = 0.6)
+        priority_value = self.priority / ExplorerService.Max_Priority
+
+        # Runde auf 1 Dezimalstelle
+        priority_display = round(priority_value, 1)
+
+        self.priority_label = QLabel(f"⚡ {priority_display}")
+
+        title_layout.addWidget(self.priority_label)
+
+        self.badge = QLabel(treffer_typ.upper())
+        title_layout.addWidget(self.badge)
         layout.addLayout(title_layout)
 
         # Body
@@ -125,6 +139,51 @@ class SearchResultCard(QFrame):
         layout.addWidget(self.body_label)
 
         self.update_style() # Style Update immer am Ende
+
+    def enterEvent(self, event):
+        """Maus über der Card"""
+        # Farbe je nach checked-State
+        color = self.colors.Primary.CLICKED.name() if self.checked else self.colors.Primary.MAIN.name()
+
+        self.title_label.setStyleSheet(f"""
+            font-size: 16px;
+            font-weight: bold;
+            color: {color};
+            background-color: none;
+            text-decoration: underline;
+        """)
+
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        """Maus verlässt Card"""
+        # Farbe je nach checked-State
+        color = self.colors.Primary.CLICKED.name() if self.checked else self.colors.Primary.MAIN.name()
+
+        self.title_label.setStyleSheet(f"""
+            font-size: 16px;
+            font-weight: bold;
+            color: {color};
+            background-color: none;
+            text-decoration: none;
+        """)
+
+        super().leaveEvent(event)
+
+    def mousePressEvent(self, event):
+        self.clicked.emit(self.rel_path)
+
+        # Einmal auf True setzen und nie zurück
+        if not self.checked:
+            self.checked = True
+            self.title_label.setStyleSheet(f"""
+                font-size: 16px;
+                font-weight: bold;
+                color: {self.colors.Primary.CLICKED.name()};
+                background-color: none;
+            """)
+
+        super().mousePressEvent(event)
 
     def on_theme_changed(self):
         """Wird bei Theme-Wechsel aufgerufen"""
@@ -144,24 +203,36 @@ class SearchResultCard(QFrame):
                 max-width: 1200px;
                 min-width: 600px;
             }}
-            #resultCard:hover {{
-                border-left: 3px solid {self.colors.Primary.MAIN.name()};
-            }}
+            
         """)
+
 
         self.title_label.setStyleSheet(f"""
             font-size: 16px;
             font-weight: bold;
             color: {self.colors.Primary.MAIN.name()};
             background-color: none;
+            text-decoration: none;
         """)
+
 
         # Badge (falls du einen Zugriff darauf brauchst - hier müsstest du badge als Instanzvariable speichern)
         if hasattr(self, 'badge'):
             self.badge.setStyleSheet(f"""
                 background-color: none;
                 color: {self.colors.Primary.MAIN.name()};
-                padding: 2px 8px;
+                padding: 2px 8px 2px 4px;
+                border-radius: 4px;
+                font-size: 11px;
+                font-weight: bold;
+            """)
+
+        if hasattr(self, 'priority_label'):
+            self.priority_label.setStyleSheet(f"""
+                background-color: none;
+                color: {self.colors.Secondary.MAIN.name()};
+                padding: 2px 4px;
+            
                 border-radius: 4px;
                 font-size: 11px;
                 font-weight: bold;
@@ -174,9 +245,7 @@ class SearchResultCard(QFrame):
             background-color: none;
         """)
 
-    def mousePressEvent(self, event):
-        self.clicked.emit(self.rel_path)
-        super().mousePressEvent(event)
+
 
 
 
@@ -281,18 +350,31 @@ class MainPage(QMainWindow):
 
         header_layout.addWidget(title_widget)
 
+
+
+        # Label für Suchtiefe
+        self.search_depth_label = QLabel("\ue698")
+        header_layout.addWidget(self.search_depth_label)
+
+        # Input-Feld für search_depth
+        self.search_depth_input = QLineEdit()
+        self.search_depth_input.setPlaceholderText("1000")
+        self.search_depth_input.setToolTip("Länge der Suchtiefe in Dateien in Zeichen.\nEine Seite hat etwa 2000 Zeichen.\nWeniger Suchtiefe beschleunigt die Suche ist aber ungenauer.")
+        self.search_depth_input.setAlignment(Qt.AlignCenter)
+        self.search_depth_input.setFocusPolicy(Qt.ClickFocus)
+
+        header_layout.addWidget(self.search_depth_input)
+
         # Lupe
         self.search_icon_keywords = QLabel("\uf002")
-        self.search_icon_keywords.setFixedSize(30, 30)  # Breite/Höhe fix
         self.search_icon_keywords.setAlignment(Qt.AlignCenter)
-
-
         header_layout.addWidget(self.search_icon_keywords)
 
         # Modernes Suchfeld
         self.keywords_input = QLineEdit()
         self.keywords_input.setPlaceholderText("Suche starten mit Enter")
         self.keywords_input.setMinimumHeight(40)
+        self.keywords_input.setFocusPolicy(Qt.ClickFocus)
 
 
         self.keywords_input.returnPressed.connect(self.controller.search)
@@ -301,7 +383,6 @@ class MainPage(QMainWindow):
         # Choose Path Button mit Icon
         self.btn = QPushButton()
         self.btn.setMinimumHeight(40)
-        self.btn.setCursor(Qt.PointingHandCursor)
 
         self.btn.setText("\uf07b")
         self.btn.clicked.connect(self.controller.choose_path)
@@ -601,6 +682,41 @@ class MainPage(QMainWindow):
                 padding: 0;
             """)
 
+    def update_search_depth_style(self):
+        """Aktualisiert den Style des Suchtiefe-Eingabefelds"""
+
+        # Label Style
+        if hasattr(self, 'search_depth_label'):
+            self.search_depth_label.setStyleSheet(f"""
+                QLabel {{
+                    font-family: 'Font Awesome 7 Free';
+                    font-size: 20px;
+                    background-color: none;
+                }}
+            """)
+
+        # Input Field Style - angepasst an keyword_input
+        if hasattr(self, 'search_depth_input'):
+            self.search_depth_input.setStyleSheet(f"""
+                QLineEdit {{
+                    background-color: {self.colors.UI.INPUT_BG.name()};
+                    border: 2px solid {self.colors.UI.INPUT_BORDER.name()};
+                    color: {self.colors.Text.PRIMARY.name()};
+                    font-size: 16px;
+                    padding: 10px 4px;
+                    border-radius: 20px;
+                    max-width: 50px;
+                    
+                }}
+                QLineEdit:focus {{
+                    border: 2px solid {self.colors.Primary.MAIN.name()};
+                }}
+                QLineEdit::placeholder {{
+                    color: {self.colors.Text.DISABLED.name()};
+                    font-style: italic;
+                }}
+            """)
+
     def update_search_icon_style(self):
         """Aktualisiert den Such-Label (Lupe) Style"""
         if hasattr(self, 'search_icon_keywords'):
@@ -619,7 +735,7 @@ class MainPage(QMainWindow):
                     background-color: {self.colors.UI.INPUT_BG.name()};
                     border: 2px solid {self.colors.UI.INPUT_BORDER.name()};
                     border-radius: 20px;
-                    padding: auto 8px;
+                    padding: 10px 8px;
                     font-size: 16px;
                     color: {self.colors.Text.PRIMARY.name()};
                     font-family: Helvetica, Arial, sans-serif;
@@ -637,7 +753,7 @@ class MainPage(QMainWindow):
                     background-color: {self.colors.UI.INPUT_BG.name()};
                     border: 2px solid {self.colors.UI.INPUT_BORDER.name()};
                     border-radius: 20px;
-                    padding: 8px 20px;
+                    padding: 10px 20px;
                     font-size: 14px;
                     color: {self.colors.Text.PRIMARY.name()};
                     font-weight: bold;
@@ -812,6 +928,7 @@ class MainPage(QMainWindow):
         # Dann alle Einzel-Widgets
         self.update_key_label_style()
         self.update_eek_label_style()
+        self.update_search_depth_style()
         self.update_search_icon_style()
         self.update_keywords_input_style()
         self.update_path_button_style()

@@ -20,7 +20,7 @@ from Service.reader_service import ReaderService
 # Threads sind nur bei I/O lastigen Dingen echte Beschleunigung da sie an der gleichen Interpreter Instanz laufen   #
 # Multiprocessing erstellt eigene Interpreter Instance für jeden Process                                            #
 #####################################################################################################################
-def process_chunk_static(dateien_chunk, keywords, threads_per_process, chunk_id, basis_pfad, progress_queue):
+def process_chunk_static(dateien_chunk, keywords, search_depth, threads_per_process, chunk_id, basis_pfad, progress_queue):
     """OPTIMIERT: Mit besseren Werten für Threads"""
     try:
         from Service.reader_service import ReaderService
@@ -38,6 +38,7 @@ def process_chunk_static(dateien_chunk, keywords, threads_per_process, chunk_id,
                     dateipfad,
                     keyword_list,
                     reader,
+                    search_depth,
                     basis_pfad
                 )
                 futures[future] = dateipfad
@@ -61,11 +62,11 @@ def process_chunk_static(dateien_chunk, keywords, threads_per_process, chunk_id,
         return []
 
 
-def process_single_file_static(dateipfad, keyword_list, reader, basis_pfad):
+def process_single_file_static(dateipfad, keyword_list, reader, search_depth, basis_pfad):
     """Schnellere Textsuche"""
     try:
         # 🔥 max_chars erhöht für bessere Trefferquote
-        text = reader.extract_text(dateipfad, max_chars=700)
+        text = reader.extract_text(dateipfad, search_depth)
         if not text:
             return None
 
@@ -77,10 +78,10 @@ def process_single_file_static(dateipfad, keyword_list, reader, basis_pfad):
         kontext = None
         is_text_generated = False
         # 🔥 Keyword-Check in einem Durchgang
-        for i, keyword in enumerate(keyword_list, start=1):
+        for i, keyword in enumerate(keyword_list, start=0):
             if keyword in text_lower:
                 found = True
-                priority += i
+                priority += len(keyword_list) - i
                 if not is_text_generated: # Kontext wird aus erstem treffer erzeugt.
                     kontext = make_body_text_static(text, keyword, ctx=200)
                     dateiname = os.path.basename(dateipfad)
@@ -176,7 +177,9 @@ class MainPageController(QObject):  # QObject für Signal-Support
             self.all_files_cache = []
 
     def search(self, event=None):
-        keywords = self.view.keywords_input.text()  # .text() statt .get() für Qt
+        keywords = self.view.keywords_input.text()
+        search_depth = int(self.view.search_depth_input.text()) if self.view.search_depth_input.text().isdigit() else 1000 # default einfach 1000
+        self.view.search_depth_input.setText(str(search_depth))
 
         if not hasattr(self.view, "basis_pfad") or not self.view.basis_pfad:
             print("kein Pfad ausgewählt")
@@ -201,14 +204,14 @@ class MainPageController(QObject):  # QObject für Signal-Support
         # Hier wird der code im target dem Thread übergeben Runnable oder Future Code genannt
         self.search_thread = threading.Thread(
             target=self._run_search_thread_multiprocessing,
-            args=(keywords, self.cancel_thread_event),
+            args=(keywords, search_depth, self.cancel_thread_event),
             name="search_thread" + time.strftime("%Y%m%d-%H%M%S"),
             daemon=True
         )
         self.search_thread.start()  # Startet den Thread erst
         print(f"🔍 Suche nach '{keywords}' gestartet...")
 
-    def _run_search_thread_multiprocessing(self, keywords, cancel_thread_event):
+    def _run_search_thread_multiprocessing(self, keywords, search_depth, cancel_thread_event):
         """
             Hauptsuchroutine - läuft im Thread, startet Multiprocessing-Pool
             Sammelt Dateien, filtert Namen, verteilt Content-Suche auf Prozesse
@@ -276,7 +279,7 @@ class MainPageController(QObject):  # QObject für Signal-Support
                 for i, chunk in enumerate(chunks):
                     result = pool.apply_async(
                         process_chunk_static,
-                        (chunk, keywords, self.threads_per_process, i, self.view.basis_pfad, progress_queue)
+                        (chunk, keywords, search_depth, self.threads_per_process, i, self.view.basis_pfad, progress_queue)
                     )
                     results.append(result)
 

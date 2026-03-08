@@ -77,12 +77,12 @@ class ExplorerService:
             file_lower = filename.lower()
             file_normalized = unicodedata.normalize('NFC', file_lower)
 
-            for i, keyword in enumerate(keyword_list, start=1):
+            for i, keyword in enumerate(keyword_list, start=0):
                 keyword_normalized = unicodedata.normalize('NFC', keyword.lower())
                 if keyword_normalized in file_normalized:
-                    priority += i  # Summe aller Treffer
+                    priority += len(keyword_list) - i  # Summe aller Treffer
 
-            if priority > 0:  # Nur Dateien mit mindestens einem Treffer
+            if priority / ExplorerService.Max_Priority > 0.5:  # Nur Dateien mit höherer Priorität sind Filetreffer
                 filtered_files.append((priority, filepath))  # Ein Tuple pro Datei
 
         return filtered_files
