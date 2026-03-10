@@ -1,5 +1,8 @@
 import os
 import unicodedata
+import zipfile
+import re
+from typing import Optional
 from typing import Optional, List
 from pathlib import Path
 
@@ -40,6 +43,8 @@ class ReaderService:
             '.xlsx', '.xls', '.csv',
             # Präsentationen
             '.pptx', '.ppt',
+            # Apple Office
+            '.pages', '.numbers'
         }
 
         # Für Statistiken/Logging
@@ -96,6 +101,8 @@ class ReaderService:
                 text = self._extract_opendocument(safe_path, max_chars)
             elif ext == '.rtf':
                 text = self._extract_rtf(safe_path, max_chars)
+            elif ext == '.numbers' or ext == '.pages':
+                text = self._extract_iwork_file(safe_path, max_chars)
             else:
                 text = self._extract_generic(safe_path, max_chars)
 
@@ -511,6 +518,57 @@ class ReaderService:
             print(f"⚠️ RTF-Fehler: {e}")
             raise
 
+
+    def _extract_iwork_file(self, filepath: str, max_chars: Optional[int] = None) -> str:
+        """
+        Extrahiert Text aus Apple .pages oder .numbers Dateien (XML + IWA Fallback, Unicode-fähig, Müll reduziert).
+        """
+        try:
+            with zipfile.ZipFile(filepath, "r") as z:
+
+                # ===== Altes XML Format =====
+                for xml_name in ["index.xml", "Index.zip"]:
+                    if xml_name in z.namelist():
+                        data = z.read(xml_name).decode("utf-8", errors="ignore")
+                        text = re.sub(r"<[^>]+>", " ", data)
+                        text = re.sub(r"\s+", " ", text)
+                        return text[:max_chars] if max_chars else text
+
+                # ===== Neues IWA Format =====
+                text_parts = []
+
+                for name in z.namelist():
+                    if name.endswith(".iwa"):
+                        raw = z.read(name)
+
+                        strings = re.findall(rb"[ -~]+", raw)
+
+                        for s in strings:
+                            try:
+                                text = s.decode("utf-8", errors="ignore").strip()
+
+                                # Heuristik: mind. 3 Buchstaben/Zahlen, Sonderzeichen ≤ Buchstaben/Zahlen
+                                letters_digits = sum(c.isalnum() for c in text)
+                                total = len(text)
+                                special_chars = total - letters_digits
+
+                                if letters_digits >= 3 and special_chars <= letters_digits:
+                                    text_parts.append(text)
+
+                            except:
+                                pass
+
+                text = " ".join(text_parts)
+                text = re.sub(r"\s+", " ", text)
+
+                if not text:
+                    raise ValueError("Kein Text im IWA gefunden")
+
+                return text[:max_chars] if max_chars else text
+
+        except Exception as e:
+            print(f"⚠️ IWork-Datei-Fehler: {e}")
+            raise
 
     def _extract_generic(self, filepath: str, max_chars: Optional[int] = None) -> str:
         """Fallback für nicht implementierte Formate."""
