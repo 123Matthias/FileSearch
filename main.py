@@ -63,8 +63,8 @@ class Main:
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    app.setApplicationName("KeySeek")
-    app.setApplicationDisplayName("KeySeek")
+    app.setApplicationName("KeySearch")
+    app.setApplicationDisplayName("KeySearch")
 
     main_app = Main(app)  # 👈 app übergeben
     sys.exit(main_app.run())

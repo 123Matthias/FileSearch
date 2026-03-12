@@ -241,7 +241,7 @@ class MainPage(QMainWindow):
         self.colors = self.theme_manager.get_colors()
 
         # Fenster-Setup
-        self.setWindowTitle("KeySeek")
+        self.setWindowTitle("KeySearch")
         self.setMinimumSize(1000, 700)
 
         # Menu Bar
@@ -354,13 +354,13 @@ class MainPage(QMainWindow):
             Qt.SmoothTransformation
         ))
 
-        self.eek_label = QLabel("eek")
+        self.earch_label = QLabel("earch")
 
 
         title_layout.addWidget(self.key_label)
         title_layout.addWidget(self.key_label)
         title_layout.addWidget(s_label)
-        title_layout.addWidget(self.eek_label)
+        title_layout.addWidget(self.earch_label)
         title_layout.addStretch()
 
         header_layout.addWidget(title_widget)
@@ -386,7 +386,7 @@ class MainPage(QMainWindow):
 
         # Modernes Suchfeld
         self.keywords_input = QLineEdit()
-        self.keywords_input.setPlaceholderText("Suche starten mit Enter")
+        self.keywords_input.setPlaceholderText(Language.get("MainPage","placeholderSearch"))
         self.keywords_input.setMinimumHeight(40)
         self.keywords_input.setFocusPolicy(Qt.ClickFocus)
 
@@ -437,7 +437,7 @@ class MainPage(QMainWindow):
         self.h_box_path = QHBoxLayout()
         self.h_box_path.setAlignment(Qt.AlignCenter)
 
-        self.text_label = QLabel("Suchpfad: ")
+        self.text_label = QLabel(Language.get("MainPage","searchPath"))
         self.pfad_label = QLabel(Language.get("MainPage", "noPathMessage"))
 
 
@@ -484,7 +484,7 @@ class MainPage(QMainWindow):
         self.cards_array_results_layout:list[SearchResultCard] = []
 
         # Empty State Label (wird beim Hinzufügen von Ergebnissen versteckt)
-        self.empty_state_label = QLabel("Noch keine Suchergebnisse...")
+        self.empty_state_label = QLabel(Language.get("MainPage","noResultsText"))
         self.empty_state_label.setAlignment(Qt.AlignCenter)
 
         self.results_layout.addWidget(self.empty_state_label)
@@ -701,7 +701,7 @@ class MainPage(QMainWindow):
         right_layout = QHBoxLayout()
         right_layout.setSpacing(0)
 
-        self.matches_label = QLabel("Matches:")
+        self.matches_label = QLabel(Language.get("MainPage","matches"))
         self.matches_label.setObjectName("matchesLabel")
 
         self.matches_label_value = QLabel(str(self.matches_count))
@@ -881,10 +881,10 @@ class MainPage(QMainWindow):
                 padding: 0;
             """)
 
-    def update_eek_label_style(self):
-        """Aktualisiert den Eek-Label Style"""
-        if hasattr(self, 'eek_label'):
-            self.eek_label.setStyleSheet(f"""
+    def update_earch_label_style(self):
+        """Aktualisiert den earch-Label Style"""
+        if hasattr(self, 'earch_label'):
+            self.earch_label.setStyleSheet(f"""
                 font-size: 36px;
                 font-weight: bold;
                 color: {self.colors.Secondary.MAIN.name()};
@@ -1137,7 +1137,7 @@ class MainPage(QMainWindow):
 
         # Dann alle Einzel-Widgets
         self.update_key_label_style()
-        self.update_eek_label_style()
+        self.update_earch_label_style()
         self.update_search_depth_style()
         self.update_search_icon_style()
         self.update_keywords_input_style()

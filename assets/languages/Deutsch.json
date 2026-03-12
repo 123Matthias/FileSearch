@@ -1,7 +1,10 @@
 {
   "MainPage": {
-    "placeholderSearch": "Suche...",
-    "noPathMessage": "Bitte wähle einen Pfad aus"
+    "placeholderSearch": "Enter drücken zum starten...",
+    "noPathMessage": "Bitte wähle einen Pfad aus",
+    "searchPath": "Suchpfad",
+    "noResultsText": "noch keine Suchergebnisse...",
+    "matches": "Treffer"
   },
   "HelpPage": {
     "title": "Hilfe",
