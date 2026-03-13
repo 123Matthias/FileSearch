@@ -13,5 +13,25 @@
   "SettingsPage": {
     "title": "Settings",
     "language": "Language"
+  },
+  "AppInfoHelpPage": {
+    "description": "Desktop Search Engine\n\nSearch local files by name and content\nuses Python multiprocessing with brute-force search\nDesign based on internet search engines\nResult ranking with or without keyword weighting\nContext snippets for content matches."
+  },
+  "SettingsHelpPage": {
+    "window_title": "Settings",
+    "ranking_title": "Ranking / Weighting",
+    "ranking_description": "Search terms are weighted by order when the checkbox is activated:\n\nExample: Searching for 'John Doe Invoice'\nJohn (3) + Doe (2) + Invoice (1) = 6/6 points = 1.0 (perfect match)\nOnly 'Doe Invoice' = 2 + 1 = 3/6 = 0.5 (lower ranking)\n\nThe first search term additionally always determines the context in the snippet.\nWeighting can be disabled in settings - then all words count equally.",
+    "results_title": "Search Results",
+    "results_description": "The file path is always checked first:\n• If a match has a ranking above 0.5, it is immediately displayed as a FILENAME match\n• If the ranking is below 0.5 or 0.0, the content search is started\n\nA content match is always displayed - regardless of ranking or priority.\n\nDisabling weighting only changes the calculation of this value, not the display logic.",
+    "snippet_title": "Snippet Size",
+    "snippet_description": "Determines how many characters left and right of the match are displayed.\nExample: With size 50, 50 characters before and 50 after the match are shown.",
+    "search_depth_title": "Search Depth (Content)",
+    "search_depth_description": "Determines how many characters per file are read during content search.\n• Average text page has about 2000-3000 characters\n• Higher values = more thorough search, but slower\n• Lower values = faster search, but possibly incomplete\n\nPDF files always read at least the first page, regardless of setting.",
+    "default_path_title": "Default Search Path",
+    "default_path_description": "The path preselected in the directory dialog when the app starts.\nCan be changed via 'Choose Directory'.\nThe last selected path is remembered for the next session and written to cache.",
+    "language_title": "Language",
+    "language_description": "After changing the language, the application must be restarted.",
+    "console_title": "Console",
+    "console_description": "The button next to the progress bar opens the console.\nIt shows detailed information about the search process,\nincluding file processing, matches found, and performance data."
   }
 }

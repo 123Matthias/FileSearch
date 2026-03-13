@@ -17,6 +17,7 @@ from Controller.main_page_controller import MainPageController
 from Service.explorer_service import ExplorerService
 
 from View.gui_console import GUIConsole
+from View.menu_bar import MenuBar
 from View.settings_page import SettingsWindow
 from View.theme_manager import ThemeManager
 from language import Language
@@ -224,11 +225,13 @@ class SearchResultCard(QFrame):
 
 class MainPage(QMainWindow):
 
-
+    update_values_signal = Signal()
     def __init__(self, controller):
         super().__init__()
         self.controller = controller
         self.controller.set_view(self)
+
+        self.update_values_signal.connect(self.update_values_UI)
 
         # Service-Instanz
         self.explorer_service = ExplorerService()
@@ -244,13 +247,7 @@ class MainPage(QMainWindow):
         self.setWindowTitle("KeySearch")
         self.setMinimumSize(1000, 700)
 
-        # Menu Bar
-        self.extras_menu = self.menuBar().addMenu("Extras")
-
-        settings_action = QAction("Einstellungen", self)
-        settings_action.triggered.connect(self.open_settings)
-        self.extras_menu.addAction(settings_action)
-
+        self.menu_bar = MenuBar(self)
 
         # Scroll Attribute für scroll down lazy loading
         self.scroll_busy = False
@@ -285,29 +282,6 @@ class MainPage(QMainWindow):
         self.setup_keyboard_shortcuts()
 
         self.update_all_widgets_style() # Alle Gui Elemente Style laden
-
-    def open_settings(self):
-        dialog = SettingsWindow()
-        last_language = ProjectData.language
-        last_search_depth = ProjectData.search_depth
-        last_snippet_size = ProjectData.snippet_size
-
-        dialog.exec()  # Blockiert bis Fenster geschlossen
-
-        # Nachdem Fenster geschlossen wurde:
-        needs_restart = False
-
-        if ProjectData.language != last_language:
-            self.set_self_destroying_message("Sprache geändert - Neustart erforderlich")
-            needs_restart = True
-
-        if needs_restart:
-            QProcess.startDetached(sys.executable, sys.argv)
-            # Diese App beenden
-            QApplication.quit()
-
-
-
 
 
     def set_matches_count(self, count):
@@ -377,6 +351,7 @@ class MainPage(QMainWindow):
         self.search_depth_input.setToolTip("Länge der Suchtiefe in Dateien in Zeichen.\nEine Seite hat etwa 2000 Zeichen.\nWeniger Suchtiefe beschleunigt die Suche ist aber ungenauer.")
         self.search_depth_input.setAlignment(Qt.AlignCenter)
         self.search_depth_input.setFocusPolicy(Qt.ClickFocus)
+
         header_layout.addWidget(self.search_depth_input)
 
         # Lupe
@@ -386,7 +361,7 @@ class MainPage(QMainWindow):
 
         # Modernes Suchfeld
         self.keywords_input = QLineEdit()
-        self.keywords_input.setPlaceholderText(Language.get("MainPage","placeholderSearch"))
+        self.keywords_input.setPlaceholderText(Language.get_language("MainPage", "placeholderSearch"))
         self.keywords_input.setMinimumHeight(40)
         self.keywords_input.setFocusPolicy(Qt.ClickFocus)
 
@@ -395,14 +370,16 @@ class MainPage(QMainWindow):
         header_layout.addWidget(self.keywords_input)
 
         # Choose Path Button mit Icon
-        self.btn = QPushButton()
-        self.btn.setMinimumHeight(40)
 
-        self.btn.setText("\uf07b")
-        self.btn.clicked.connect(self.controller.choose_path)
-        header_layout.addWidget(self.btn)
+        self.path_btn = QPushButton()
+        self.path_btn.setMinimumHeight(40)
+
+        self.path_btn.setText("\uf07b")
+        self.path_btn.clicked.connect(self.controller.choose_path)
+        header_layout.addWidget(self.path_btn)
 
         parent_layout.addWidget(header_widget)
+
 
     def setup_progress_section(self, parent_layout):
         """Fortschrittsleiste mit Toggle-Button und Loading-Indicator"""
@@ -437,14 +414,18 @@ class MainPage(QMainWindow):
         self.h_box_path = QHBoxLayout()
         self.h_box_path.setAlignment(Qt.AlignCenter)
 
-        self.text_label = QLabel(Language.get("MainPage","searchPath"))
-        self.pfad_label = QLabel(Language.get("MainPage", "noPathMessage"))
+        self.path_label = QLabel(Language.get_language("MainPage", "searchPath"))
+        self.path = QLabel()
+        if ProjectData.default_search_path:
+            self.path.setText(ProjectData.default_search_path)
+        else:
+            self.path.setText(Language.get_language("MainPage", "noPathMessage"))
 
 
-
-        self.h_box_path.addWidget(self.text_label)
-        self.h_box_path.addWidget(self.pfad_label)
+        self.h_box_path.addWidget(self.path_label)
+        self.h_box_path.addWidget(self.path)
         parent_layout.addLayout(self.h_box_path)
+
 
     def setup_main_splitter(self, parent_layout):
         """Splitter für Ergebnisse und Konsole"""
@@ -484,7 +465,7 @@ class MainPage(QMainWindow):
         self.cards_array_results_layout:list[SearchResultCard] = []
 
         # Empty State Label (wird beim Hinzufügen von Ergebnissen versteckt)
-        self.empty_state_label = QLabel(Language.get("MainPage","noResultsText"))
+        self.empty_state_label = QLabel(Language.get_language("MainPage", "noResultsText"))
         self.empty_state_label.setAlignment(Qt.AlignCenter)
 
         self.results_layout.addWidget(self.empty_state_label)
@@ -514,7 +495,8 @@ class MainPage(QMainWindow):
         # Stelle sicher, dass die Console beim Schließen restored wird
         self.destroyed.connect(self.console.restore)
 
-
+    def update_values_UI(self):
+        self.search_depth_input.setText(str(ProjectData.search_depth))
 
     def toggle_console(self, checked):
         """Konsole ein-/ausblenden mit Animation"""
@@ -701,7 +683,7 @@ class MainPage(QMainWindow):
         right_layout = QHBoxLayout()
         right_layout.setSpacing(0)
 
-        self.matches_label = QLabel(Language.get("MainPage","matches"))
+        self.matches_label = QLabel(Language.get_language("MainPage", "matches"))
         self.matches_label.setObjectName("matchesLabel")
 
         self.matches_label_value = QLabel(str(self.matches_count))
@@ -864,7 +846,7 @@ class MainPage(QMainWindow):
 
     def update_path_label(self, path):
         display_path = path
-        self.pfad_label.setText(f"📂 {display_path}")
+        self.path.setText(f"📂 {display_path}")
 
 
 
@@ -957,8 +939,8 @@ class MainPage(QMainWindow):
 
     def update_path_button_style(self):
         """Aktualisiert den Path-Button Style"""
-        if hasattr(self, 'btn'):
-            self.btn.setStyleSheet(f"""
+        if hasattr(self, 'path_btn'):
+            self.path_btn.setStyleSheet(f"""
                 QPushButton {{
                     background-color: {self.colors.UI.INPUT_BG.name()};
                     border: 2px solid {self.colors.UI.INPUT_BORDER.name()};
@@ -1011,7 +993,7 @@ class MainPage(QMainWindow):
     def update_text_label_style(self):
         """Aktualisiert das Text-Label (Suchpfad:) Style"""
         if hasattr(self, 'text_label'):
-            self.text_label.setStyleSheet(f"""
+            self.path_label.setStyleSheet(f"""
                 QLabel {{
                     font-size: 14px;
                     padding: 0px 0px 0px 0px;
@@ -1022,8 +1004,8 @@ class MainPage(QMainWindow):
 
     def update_pfad_label_style(self):
         """Aktualisiert das Pfad-Label Style"""
-        if hasattr(self, 'pfad_label'):
-            self.pfad_label.setStyleSheet(f"""
+        if hasattr(self, 'path_label'):
+            self.path.setStyleSheet(f"""
                 QLabel {{
                     color: {self.colors.Text.SECONDARY.name()};
                     font-size: 14px;
@@ -1167,71 +1149,3 @@ class MainPage(QMainWindow):
 
         # ALLE Widgets updaten
         self.update_all_widgets_style()
-
-    def set_self_destroying_message(self, text, duration=3000):
-        """
-        Centered, temporary message over MainWindow with border, background and Python logo.
-        """
-        # Container über MainWindow
-        container = QWidget(self)
-        container.setAttribute(Qt.WA_TransparentForMouseEvents)
-        container.setAttribute(Qt.WA_TranslucentBackground)
-        container.setGeometry(self.rect())
-
-        # Layout für Zentrierung
-        layout = QVBoxLayout(container)
-        layout.setAlignment(Qt.AlignCenter)
-        layout.setContentsMargins(0, 0, 0, 0)
-
-        # Haupt-Widget
-        msg_widget = QWidget()
-
-        # Horizontales Layout für Icon + Text nebeneinander
-        msg_layout = QHBoxLayout(msg_widget)
-        msg_layout.setAlignment(Qt.AlignCenter)
-        msg_layout.setContentsMargins(25, 20, 25, 20)
-        msg_layout.setSpacing(15)
-
-        # Icon Label mit Python-Logo
-        icon_label = QLabel()
-        python_icon = QPixmap("assets/img/pythonFett.png")
-        python_icon = python_icon.scaled(32, 32, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        icon_label.setPixmap(python_icon)
-
-        # Text Label
-        text_label = QLabel(text)
-        text_label.setWordWrap(True)
-
-        # Stylisches QSS
-        msg_widget.setStyleSheet(f"""
-            QWidget {{
-                background-color: {self.colors.UI.CONTAINER_BG.name()};
-                border: 2px solid {self.colors.Primary.MAIN.name()};
-                border-radius: 12px;
-            }}
-
-            QLabel {{
-                color: {self.colors.Text.PRIMARY.name()};
-                font-size: 15px;
-                font-weight: 500;
-                background: transparent;
-                border: none;
-            }}
-        """)
-
-        msg_layout.addWidget(icon_label)
-        msg_layout.addWidget(text_label)
-        layout.addWidget(msg_widget)
-
-        container.show()
-
-        # Fade-Out Animation auf dem msg_widget
-        self.fade_anim = QPropertyAnimation(msg_widget, b"windowOpacity")
-        self.fade_anim.setDuration(1000)
-        self.fade_anim.setStartValue(1.0)
-        self.fade_anim.setEndValue(0.0)
-        self.fade_anim.finished.connect(container.deleteLater)
-
-        # Start nach duration
-        QTimer.singleShot(duration, self.fade_anim.start)
-

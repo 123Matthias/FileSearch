@@ -1,6 +1,8 @@
 import math
 from typing import Tuple
 import psutil
+from PySide6.QtCore import Signal
+
 
 class ProjectData:
 
@@ -10,7 +12,7 @@ class ProjectData:
     keyword_weight = False
     search_depth = 4000
     snippet_size = 250
-    default_search_path = "~"
+    default_search_path = ""
     language = "English"
 
     @classmethod
@@ -18,13 +20,12 @@ class ProjectData:
         cls.language = language
 
     @classmethod
-    def set_settings(cls, keyword_weight, search_depth, snippet_size, default_search_path, language):
+    def set(cls, keyword_weight, search_depth, snippet_size, default_search_path, language):
         cls.keyword_weight = keyword_weight
         cls.search_depth = search_depth
         cls.snippet_size = snippet_size
         cls.default_search_path = default_search_path
         cls.language = language
-    
 
     @classmethod
     def _get_physical_and_logical_cores(cls) -> Tuple[int, int]:

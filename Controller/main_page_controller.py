@@ -13,6 +13,7 @@ from PySide6.QtWidgets import QFileDialog  # Qt FileDialog
 from Process.search_process import SearchProcess
 from Service.explorer_service import ExplorerService
 from Service.reader_service import ReaderService
+from View.messages import Messages
 from project_data import ProjectData
 
 
@@ -25,7 +26,7 @@ class MainPageController(QObject):  # QObject für Signal-Support
     show_status_signal = Signal(str, str)  # message, typ
     search_finished_signal = Signal(bool)
     matches_count_signal = Signal(int)
-    self_destroying_message_signal = Signal(str)
+    no_path_selected_signal = Signal()
 
     def __init__(self):
         super().__init__()  # QObject Init aufrufen
@@ -75,7 +76,7 @@ class MainPageController(QObject):  # QObject für Signal-Support
         self.search_finished_signal.connect(view.sort_results)
         self.search_finished_signal.connect(view.refresh_results_display)
         self.matches_count_signal.connect(view.set_matches_count)
-        self.self_destroying_message_signal.connect(view.set_self_destroying_message)
+        self.no_path_selected_signal.connect(lambda: Messages.set_no_path_selected(view))
 
         # KEIN Timer mehr nötig! Signals werden sofort im Haupt-Thread verarbeitet
 
@@ -89,17 +90,23 @@ class MainPageController(QObject):  # QObject für Signal-Support
         )
 
         if pfad:
-            # Plattformabhängige Pfadnormalisierung mit platform
-            if platform.system() == "Windows":
-                # Windows: Backslashes und ESCAPEN für Python-Strings!
-                pfad = pfad.replace('/', '\\')  # Erst normalisieren
-            else:
-                # Linux/Mac: Forward Slashes
-                pfad = pfad.replace('\\', '/')
+            self.process_selected_path(pfad)
 
-            self.update_path_signal.emit(pfad)
-            self.path_selected_ui = pfad
-            self.all_files_cache = []
+
+    def process_selected_path(self, pfad):
+        """Normalisiert den Pfad plattformabhängig und speichert ihn"""
+        # Plattformabhängige Pfadnormalisierung mit platform
+        if platform.system() == "Windows":
+            # Windows: Backslashes und ESCAPEN für Python-Strings!
+            pfad = pfad.replace('/', '\\')  # Erst normalisieren
+        else:
+            # Linux/Mac: Forward Slashes
+            pfad = pfad.replace('\\', '/')
+
+        self.update_path_signal.emit(pfad)
+        self.path_selected_ui = pfad
+        self.all_files_cache = []
+
 
     def search(self, event=None):
         keywords = self.view.keywords_input.text()
@@ -109,9 +116,14 @@ class MainPageController(QObject):  # QObject für Signal-Support
         self.view.search_depth_input.setText(str(search_depth))
 
         if not self.path_selected_ui:
-            print("kein Pfad ausgewählt")
-            self.self_destroying_message_signal.emit("wähle einen Pfad aus")
-            return
+            if ProjectData.default_search_path:
+                self.process_selected_path(ProjectData.default_search_path)
+            else:
+                print("kein Pfad ausgewählt")
+                self.no_path_selected_signal.emit()
+                return
+
+
         if not keywords:
             print("gib einen Suchberiff ein")
             return

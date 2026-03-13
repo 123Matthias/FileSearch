@@ -17,5 +17,5 @@ class Language:
             cls._data = json.load(f)
 
     @classmethod
-    def get(cls, page, key):
+    def get_language(cls, page, key):
         return cls._data[page][key]

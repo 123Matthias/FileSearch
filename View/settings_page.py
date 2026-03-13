@@ -1,18 +1,16 @@
 import os, json
+from re import search
+
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QDialog, QVBoxLayout, QFormLayout, QLineEdit, QPushButton, QCheckBox, QComboBox
 from chardet.metadata import languages
 
 from project_data import ProjectData
-
-
-def get_settings_path():
-    home = os.path.expanduser("~")
-    settings_dir = os.path.join(home, "keysearch_app_settings")
-    os.makedirs(settings_dir, exist_ok=True)
-    return os.path.join(settings_dir, "settings.json")
+from settings import Settings
 
 
 class SettingsWindow(QDialog):
+
 
     def __init__(self):
         super().__init__()
@@ -49,40 +47,23 @@ class SettingsWindow(QDialog):
 
         layout.addLayout(form)
 
+
+        def save_and_close():
+            Settings.save_settings(
+                self.keyword_weight,
+                self.search_depth,
+                self.snippet_size,
+                self.default_search_path,
+                self.language
+            )
+            self.close()
+
         save_btn = QPushButton("Speichern")
-        save_btn.clicked.connect(self.save_settings)
+        save_btn.clicked.connect(save_and_close)
 
         layout.addWidget(save_btn)
         self.setLayout(layout)
 
-        self.load_settings()  # beim Start laden
+        Settings.load_settings(self)
 
-    def save_settings(self):
-        data = {
-            "keyword_weight": self.keyword_weight.isChecked(),
-            "search_depth": self.search_depth.text(),
-            "snippet_size": self.snippet_size.text(),
-            "default_search_path": self.default_search_path.text(),
-            "language": self.language.currentText(),
-        }
-        with open(get_settings_path(), "w") as f:
-            json.dump(data, f, indent=4)
-        self.close()  # Fenster schließen
-        ProjectData.set_settings(
-            keyword_weight=self.keyword_weight.isChecked(),
-            search_depth=int(self.search_depth.text()),
-            snippet_size=int(self.snippet_size.text()),
-            default_search_path=self.default_search_path.text(),
-            language=self.language.currentText(),
-        )
 
-    def load_settings(self):
-        path = get_settings_path()
-        if os.path.exists(path):
-            with open(path, "r") as f:
-                data = json.load(f)
-                self.keyword_weight.setChecked(data.get("keyword_weight", False))
-                self.search_depth.setText(data.get("search_depth", 4000))
-                self.snippet_size.setText(data.get("snippet_size", 250))
-                self.default_search_path.setText(data.get("default_search_path", "~"))
-                self.language.setCurrentText(data.get("language", "English"))

@@ -7,6 +7,7 @@ from View.theme_manager import ThemeManager
 from project_data import ProjectData
 from language import Language
 from View.settings_page import SettingsWindow
+from settings import Settings
 
 
 class Main:
@@ -15,10 +16,10 @@ class Main:
 
         # Settings laden
         settings = SettingsWindow()
-        settings.load_settings()
+        Settings.load_settings()
 
         # ProjectData setzen
-        ProjectData.set_settings(
+        ProjectData.set(
             keyword_weight=settings.keyword_weight.isChecked(),
             search_depth=int(settings.search_depth.text()),
             snippet_size=int(settings.snippet_size.text()),
@@ -28,7 +29,7 @@ class Main:
 
         # Sprache laden
         Language.load(ProjectData.language)
-        print(f"✅ {Language.get('MainPage', 'noPathMessage')}")
+        print(f"✅ {Language.get_language('MainPage', 'noPathMessage')}")
 
 
         # Fonts
