@@ -3,7 +3,6 @@ from re import search
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QDialog, QVBoxLayout, QFormLayout, QLineEdit, QPushButton, QCheckBox, QComboBox
-from chardet.metadata import languages
 
 from language import Language
 from project_data import ProjectData
@@ -52,7 +51,6 @@ class SettingsWindow(QDialog):
 
         def save_and_close():
             Settings.save_settings(
-                self.keyword_weight,
                 self.search_depth,
                 self.snippet_size,
                 self.default_search_path,

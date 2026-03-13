@@ -16,9 +16,8 @@ class Settings:
 
 
     @staticmethod
-    def save_settings(keyword_weight, search_depth, snippet_size, default_search_path, language):
+    def save_settings(search_depth, snippet_size, default_search_path, language):
         data = {
-            "keyword_weight": keyword_weight.isChecked(),
             "search_depth": search_depth.text(),
             "snippet_size": snippet_size.text(),
             "default_search_path": default_search_path.text(),
@@ -27,7 +26,6 @@ class Settings:
         with open(get_settings_path(), "w") as f:
             json.dump(data, f, indent=4)
         ProjectData.set(
-            keyword_weight=keyword_weight.isChecked(),
             search_depth=int(search_depth.text()),
             snippet_size=int(snippet_size.text()),
             default_search_path=default_search_path.text(),
@@ -37,15 +35,13 @@ class Settings:
     @staticmethod
     def load_settings(window=None):
         path = get_settings_path()
-        keyword_weight = False
         search_depth = 4000
         snippet_size = 250
         default_search_path = ""
-        language = "English"
+        language = "Deutsch"
         if os.path.exists(path):
             with open(path, "r") as f:
                 data = json.load(f)
-                keyword_weight = data.get("keyword_weight", False)
                 search_depth = data.get("search_depth", 4000)
                 snippet_size = data.get("snippet_size", 250)
                 default_search_path = data.get("default_search_path", "~")
@@ -53,7 +49,6 @@ class Settings:
 
         # ProjectData updaten
         ProjectData.set(
-            keyword_weight=keyword_weight,
             search_depth=search_depth,
             snippet_size=snippet_size,
             default_search_path=default_search_path,
@@ -62,7 +57,6 @@ class Settings:
 
         # Optional: Widgets in SettingsWindow setzen
         if window:
-            window.keyword_weight.setChecked(keyword_weight)
             window.search_depth.setText(str(search_depth))
             window.snippet_size.setText(str(snippet_size))
             window.default_search_path.setText(default_search_path)

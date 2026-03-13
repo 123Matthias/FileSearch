@@ -248,6 +248,7 @@ class MainPage(QMainWindow):
         self.setMinimumSize(1000, 700)
 
         self.menu_bar = MenuBar(self)
+        self.setMenuBar(self.menu_bar)
 
         # Scroll Attribute für scroll down lazy loading
         self.scroll_busy = False
