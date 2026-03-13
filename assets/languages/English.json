@@ -10,13 +10,26 @@
     "title": "Help",
     "welcome": "Welcome to Help"
   },
+
   "SettingsPage": {
     "title": "Settings",
+    "searchDepth": "Search Depth",
+    "snippetSize": "Snippet Size",
+    "keywordWeight": "Keyword Weighting",
+    "defaultSearchPath": "Default Search Path",
     "language": "Language"
+  },
+  "MenuBar": {
+    "ExtrasItem":"QExtras",
+    "OptionsItem":"QOptions",
+    "QHelpItem": "QHelp",
+    "HelpOptionsItem":"QOptions Help",
+    "AppInfoItem":"App Info"
   },
   "AppInfoHelpPage": {
     "description": "Desktop Search Engine\n\nSearch local files by name and content\nuses Python multiprocessing with brute-force search\nDesign based on internet search engines\nResult ranking with or without keyword weighting\nContext snippets for content matches."
   },
+
   "SettingsHelpPage": {
     "window_title": "Settings",
     "ranking_title": "Ranking / Weighting",

@@ -10,10 +10,26 @@
     "title": "Hilfe",
     "welcome": "Willkommen in der Hilfe"
   },
+
   "SettingsPage": {
     "title": "Einstellungen",
+    "searchDepth": "Suchtiefe",
+    "snippetSize": "Größe Textausschnitt",
+    "keywordWeight": "Gewichtung Schlüsselwort",
+    "defaultSearchPath": "Suchpfad default",
     "language": "Sprache"
   },
+
+  "MenuBar": {
+    "ExtrasItem":"QExtras",
+    "OptionsItem": "QEinstellungen",
+    "QHelpItem": "QHilfe",
+    "HelpOptionsItem": "QEinstellungen",
+    "AppInfoItem": "QApp Info"
+
+  },
+
+
   "AppInfoHelpPage": {
     "description": "Desktop-Suchmaschine\n\nDurchsucht lokalen Dateien nach Namen und Inhalt\nverwendet Python Multiprocessing mit Brute-Force-Suche\nDesign angelehnt an Internet-Suchmaschinen\nRanking der Ergebnisse mit oder ohne Gewichtung der Suchbegriffe\nKontext-Snippets bei Treffern im Dateiinhalt."
 

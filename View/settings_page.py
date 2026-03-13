@@ -5,6 +5,7 @@ from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QDialog, QVBoxLayout, QFormLayout, QLineEdit, QPushButton, QCheckBox, QComboBox
 from chardet.metadata import languages
 
+from language import Language
 from project_data import ProjectData
 from settings import Settings
 
@@ -14,7 +15,7 @@ class SettingsWindow(QDialog):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Einstellungen")
+        self.setWindowTitle(Language.get_language("SettingsPage","title"))
         self.setMinimumWidth(300)
 
         layout = QVBoxLayout()
@@ -24,7 +25,7 @@ class SettingsWindow(QDialog):
         self.keyword_weight = QCheckBox("Aktiv")
         self.search_depth = QLineEdit("4000")
         self.snippet_size = QLineEdit("250")
-        self.default_search_path = QLineEdit("~")
+        self.default_search_path = QLineEdit("")
         self.language = QComboBox()
 
         # Clear existing items first (optional)
@@ -37,13 +38,15 @@ class SettingsWindow(QDialog):
         for filename in language_files:
             # Get filename without extension
             name_without_ext = os.path.splitext(filename)[0]
-            self.language.addItem(name_without_ext)
+            ext = os.path.splitext(filename)[1]
+            if ext == ".json":
+                self.language.addItem(name_without_ext)
 
-        form.addRow("Gewichtung Keywords", self.keyword_weight)
-        form.addRow("Default Suchtiefe", self.search_depth)
-        form.addRow("Snippet Größe", self.snippet_size)
-        form.addRow("Default Suchpfad", self.default_search_path)
-        form.addRow("Sprache", self.language)
+        form.addRow(Language.get_language("SettingsPage","keywordWeight"), self.keyword_weight)
+        form.addRow(Language.get_language("SettingsPage", "searchDepth"), self.search_depth)
+        form.addRow(Language.get_language("SettingsPage","snippetSize"), self.snippet_size)
+        form.addRow(Language.get_language("SettingsPage","defaultSearchPath"), self.default_search_path)
+        form.addRow(Language.get_language("SettingsPage", "language"), self.language)
 
         layout.addLayout(form)
 

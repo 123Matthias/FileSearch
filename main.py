@@ -6,7 +6,6 @@ from Service.font_awesome_service import FontAwesomeService
 from View.theme_manager import ThemeManager
 from project_data import ProjectData
 from language import Language
-from View.settings_page import SettingsWindow
 from settings import Settings
 
 
@@ -14,18 +13,8 @@ class Main:
     def __init__(self, my_app):  # 👈 app Parameter
         self.app = my_app
 
-        # Settings laden
-        settings = SettingsWindow()
-        Settings.load_settings()
 
-        # ProjectData setzen
-        ProjectData.set(
-            keyword_weight=settings.keyword_weight.isChecked(),
-            search_depth=int(settings.search_depth.text()),
-            snippet_size=int(settings.snippet_size.text()),
-            default_search_path=settings.default_search_path.text(),
-            language=settings.language.currentText()
-        )
+        Settings.load_settings()
 
         # Sprache laden
         Language.load(ProjectData.language)

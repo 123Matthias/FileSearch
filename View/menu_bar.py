@@ -8,6 +8,7 @@ from View.Help.app_info_help_page import AppInfoHelpPage
 from View.messages import Messages
 from View.Help.settings_help_page import SettingsHelpPage
 from View.settings_page import SettingsWindow
+from language import Language
 from project_data import ProjectData
 
 
@@ -16,23 +17,24 @@ class MenuBar(QMenuBar):
         # Menu Bar
         super().__init__(parent)
         self.window = parent
-        self.extras_menu = self.addMenu("Extras")
-        self.help_menu = self.addMenu("Hilfe")
+        self.extras_menu = self.addMenu(Language.get_language("MenuBar","ExtrasItem"))
 
-        settings_action = QAction("Einstellungen", self)
-        settings_action.triggered.connect(self.open_settings)
-        self.extras_menu.addAction(settings_action)
+        self.help_menu = self.addMenu(Language.get_language("MenuBar","QHelpItem"))
 
-        help_settings_action = QAction("App Info", self)
-        help_settings_action.triggered.connect(self.open_app_info)
-        self.help_menu.addAction(help_settings_action)
+        options_action = QAction(Language.get_language("MenuBar","OptionsItem"), self)
+        options_action.triggered.connect(self.open_options)
+        self.extras_menu.addAction(options_action)
 
-        help_settings_action = QAction("Einstellungen", self)
-        help_settings_action.triggered.connect(self.open_help_settings)
-        self.help_menu.addAction(help_settings_action)
+        help_app_info = QAction(Language.get_language("MenuBar","AppInfoItem"), self)
+        help_app_info.triggered.connect(self.open_app_info)
+        self.help_menu.addAction(help_app_info)
+
+        help_options_action = QAction(Language.get_language("MenuBar","HelpOptionsItem"), self)
+        help_options_action.triggered.connect(self.open_help_options)
+        self.help_menu.addAction(help_options_action)
 
 
-    def open_settings(self):
+    def open_options(self):
         dialog = SettingsWindow()
         last_language = ProjectData.language
         dialog.exec()  # Blockiert bis Fenster geschlossen
@@ -55,7 +57,7 @@ class MenuBar(QMenuBar):
 
         dialog.exec()
 
-    def open_help_settings(self):
+    def open_help_options(self):
         dialog = SettingsHelpPage()
 
         dialog.exec()
