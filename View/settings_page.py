@@ -42,7 +42,6 @@ class SettingsWindow(QDialog):
             if ext == ".json":
                 self.language.addItem(name_without_ext)
 
-        form.addRow(Language.get_language("SettingsPage","keywordWeight"), self.keyword_weight)
         form.addRow(Language.get_language("SettingsPage", "searchDepth"), self.search_depth)
         form.addRow(Language.get_language("SettingsPage","snippetSize"), self.snippet_size)
         form.addRow(Language.get_language("SettingsPage","defaultSearchPath"), self.default_search_path)

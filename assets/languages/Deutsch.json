@@ -38,9 +38,9 @@
   "SettingsHelpPage": {
     "window_title": "Einstellungen",
     "ranking_title": "Ranking / Gewichtung",
-    "ranking_description": "Die Suchbegriffe können Reihenfolge gewichtet wenn die Checkbox aktiviert wird:\n\nBeispiel: Suche nach 'John Doe Rechnung'\nJohn (3) + Doe (2) + Rechnung (1) = 6/6 Punkte = 1.0 (Volltreffer)\nNur 'Doe Rechnung' = 2 + 1 = 3/6 = 0.5 (schlechteres Ranking)\n\nDas erste Suchwort bestimmt zusätzlich immer den Kontext im Snippet.\nDie Gewichtung kann in den Einstellungen deaktiviert werden dann zählen alle Wörter gleich viel.",
+    "ranking_description": "Der erste Suchbegriff hat ein höheres Gewicht als der zweite usw. Beispiel: Suche nach 'John Doe Rechnung'\nJohn (3) + Doe (2) + Rechnung (1) = 6/6 Punkte = 1,0 (Volltreffer)\nNur 'Doe Rechnung' = 2 + 1 = 3/6 = 0,5 (schlechteres Ranking).\nNur 'Rechnung' (1) = 1/6 = gerundet 0,2\nWill man Rechnungen weiter oben anzeigen, müsste man 'Rechnung John Doe' schreiben.\n\nDas erste Suchwort bestimmt zusätzlich immer den Kontext im Snippet.",
     "results_title": "Suchergebnisse",
-    "results_description": "Es wird immer zuerst der Dateipfad angeschaut:\n• Hat der Treffer ein Ranking über 0,5 wird er sofort als FILENAME-Treffer angezeigt\n• Ist das Ranking darunter oder 0,0 wird die Contentsuche gestartet\n\nEin Treffer im Inhalt wird immer angezeigt - egal wie hoch das Ranking oder die Priority ist.\n\nDas Abschalten der Gewichtung ändert nur die Berechnung dieses Wertes, nicht die Anzeigelogik.",
+    "results_description": "Es wird immer zuerst der Dateipfad angeschaut:\n• Hat der Treffer ein Ranking über 0,5 wird er sofort als FILENAME-Treffer angezeigt\n• Ist das Ranking darunter oder 0,0 wird die Inhaltssuche gestartet\n\nEin Treffer im Inhalt wird immer angezeigt - egal wie hoch das Ranking oder die Priority ist.\n",
     "snippet_title": "Snippet-Größe",
     "snippet_description": "Legt fest, wie viele Buchstaben links und rechts vom Treffer angezeigt werden.\nBeispiel: Bei Größe 50 werden 50 Zeichen vor und 50 Zeichen nach dem Treffer angezeigt",
     "search_depth_title": "Suchtiefe (Inhaltssuche)",
