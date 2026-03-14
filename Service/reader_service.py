@@ -1,4 +1,5 @@
 import os
+import threading
 import unicodedata
 import zipfile
 import re
@@ -49,12 +50,15 @@ class ReaderService:
             '.pages', '.numbers'
         }
 
-        # Für Statistiken/Logging
+        # Für Statistiken/Logging No used ot the moment
         self.stats = {
             'success': 0,
             'failed': 0,
             'unsupported': 0
         }
+
+        self._lock = threading.Lock()
+
 
 
     def extract_text(self, filepath: str, max_chars: Optional[int] = ProjectData.search_depth) -> Optional[str]:
@@ -75,13 +79,12 @@ class ReaderService:
         safe_path = path.as_posix()
 
         if not os.path.exists(safe_path):
-            print(f"❓ Datei nicht gefunden: {safe_path}")
+            print(f"❓ File not found: {safe_path}")
             return None
 
         ext = os.path.splitext(filepath)[1].lower()
         if ext not in self.supported_extensions:
-            print(f"⚠️ Format nicht unterstützt: {filepath}")
-            self.stats['unsupported'] += 1
+            self.increment_stats_thread_save('unsupported',1)
             return None
 
         # Format-spezifische Extraktion
@@ -118,12 +121,12 @@ class ReaderService:
             # Text bereinigen (mehrfache Leerzeichen entfernen)
             text = ' '.join(text.split())
 
-            self.stats['success'] += 1
+            self.increment_stats_thread_save('success',1)
             return text
 
         except Exception as e:
-            print(f"❌ Fehler beim Lesen von {filepath}: {e}")
-            self.stats['failed'] += 1
+            print(f"❌ Can't read: {filepath}: {e}")
+            self.increment_stats_thread_save('failed',1)
             return None
 
     # ===== PDF =====
@@ -282,9 +285,6 @@ class ReaderService:
 
             return "\n".join(text_parts)
 
-        except ImportError:
-            print("⚠️ python-docx nicht installiert. Bitte installieren: pip install python-docx")
-            raise
         except Exception as e:
             print(f"⚠️ Word-Fehler: {e}")
             raise
@@ -381,9 +381,6 @@ class ReaderService:
 
             return "\n".join(text_parts)
 
-        except ImportError as e:
-            print(f"⚠️ Excel-Bibliothek fehlt: {e}. Bitte installieren: pip install openpyxl xlrd")
-            raise
         except Exception as e:
             print(f"⚠️ Excel-Fehler: {e}")
             raise
@@ -494,9 +491,6 @@ class ReaderService:
 
             return "\n".join(text_parts)
 
-        except ImportError:
-            print("⚠️ python-pptx nicht installiert. Bitte installieren: pip install python-pptx")
-            raise
         except Exception as e:
             print(f"⚠️ PowerPoint-Fehler: {e}")
             raise
@@ -614,3 +608,7 @@ class ReaderService:
     def get_stats(self) -> dict:
         """Gibt Statistiken zurück."""
         return self.stats.copy()
+
+    def increment_stats_thread_save(self, key, value=1):
+        with self._lock:
+            self.stats[key] += value

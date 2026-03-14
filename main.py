@@ -10,51 +10,41 @@ from settings import Settings
 
 
 class Main:
-    def __init__(self, my_app):  # 👈 app Parameter
+    def __init__(self, my_app):
         self.app = my_app
 
-
+        # Load Settings and save them into Project_Data class
         Settings.load_settings()
 
-        # Sprache laden
+        # Load Languages from Project Data
         Language.load(ProjectData.language)
-        print(f"✅ {Language.get_language('MainPage', 'noPathMessage')}")
-
 
         # Fonts
         self.font_awesome_7 = FontAwesomeService.load_font_awesome_free()
-        self.python_font = FontAwesomeService.load_python_selfmade()
 
-        # Theme
-        ThemeManager().initialize(self.app)  # 👈 self.app
+        # Theme Manager start
+        ThemeManager().initialize(self.app)
 
-        # Controller
+        # Controller instance
         self.main_page_controller = MainPageController()
 
-        # MainPage erstellen und anzeigen
+        # MainPage instance and show
         self.main_page = MainPage(self.main_page_controller)
         self.main_page.show()
 
 
-        print("✅ Main fertig")
+        print("✅ Main App initialized. Starting...")
 
     def run(self):
-        return self.app.exec()  # 👈 self.app
+        return self.app.exec()
 
-
-    def load_and_reload_page(self):
-        # Controller
-        self.main_page_controller = MainPageController()
-
-        # MainPage erstellen und anzeigen
-        self.main_page = MainPage(self.main_page_controller)
-        self.main_page.show()
 
 
 if __name__ == "__main__":
+
     app = QApplication(sys.argv)
     app.setApplicationName("KeySearch")
     app.setApplicationDisplayName("KeySearch")
 
-    main_app = Main(app)  # 👈 app übergeben
+    main_app = Main(app)
     sys.exit(main_app.run())

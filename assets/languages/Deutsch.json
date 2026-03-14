@@ -50,7 +50,9 @@
     "language_title": "Sprache",
     "language_description": "Nach Änderung der Sprache muss die Anwendung neu gestartet werden",
     "console_title": "Konsole",
-    "console_description": "Der Button neben der Fortschrittsanzeige öffnet die Konsole.\nSie zeigt detaillierte Informationen zur Suche,\nwie Dateiverarbeitung, gefundene Treffer und Leistungsdaten."
+    "console_description": "Der Button neben der Fortschrittsanzeige öffnet die Konsole.\nSie zeigt detaillierte Informationen zur Suche,\nwie Dateiverarbeitung, gefundene Treffer und Leistungsdaten.",
+    "supported_extensions_title": "Unterstützte Formate",
+    "supported_extensions": "Dokumente:\n.pdf   .txt   .md   .html   .htm   .docx   .doc   .odt   .rtf\n\nTabellen:\n.xlsx   .xls   .csv\n\nPräsentationen:\n.pptx   .ppt\n\nApple Office:\n.pages   .numbers"
   }
 
 

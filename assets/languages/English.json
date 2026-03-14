@@ -23,7 +23,7 @@
     "ExtrasItem":"QExtras",
     "OptionsItem":"QOptions",
     "QHelpItem": "QHelp",
-    "HelpOptionsItem":"QOptions Help",
+    "HelpOptionsItem":"QOptions",
     "AppInfoItem":"App Info"
   },
   "AppInfoHelpPage": {
@@ -45,6 +45,8 @@
     "language_title": "Language",
     "language_description": "After changing the language, the application must be restarted.",
     "console_title": "Console",
-    "console_description": "The button next to the progress bar opens the console.\nIt shows detailed information about the search process,\nincluding file processing, matches found, and performance data."
+    "console_description": "The button next to the progress bar opens the console.\nIt shows detailed information about the search process,\nincluding file processing, matches found, and performance data.",
+    "supported_extensions_title": "Supported Formats",
+    "supported_extensions": "Documents:\n.pdf   .txt   .md   .html   .htm   .docx   .doc   .odt   .rtf\n\nTables:\n.xlsx   .xls   .csv\n\nPresentations:\n.pptx   .ppt\n\nApple Office:\n.pages   .numbers"
   }
 }

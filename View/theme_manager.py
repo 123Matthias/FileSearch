@@ -30,7 +30,6 @@ class ThemeManager:
     def _detect_initial_theme(self):
         color_scheme = QGuiApplication.styleHints().colorScheme()
         self._current_theme = "dark" if color_scheme == Qt.ColorScheme.Dark else "light"
-        print(f"✅ Initiales Theme: {self._current_theme}")
 
     def _on_system_theme_changed(self, color_scheme):
         new_theme = "dark" if color_scheme == Qt.ColorScheme.Dark else "light"

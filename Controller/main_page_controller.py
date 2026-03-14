@@ -4,11 +4,11 @@ import threading
 import random
 import time
 
-from multiprocessing import Pool, cpu_count, Manager
+from multiprocessing import Pool, Manager
 import math
 
-from PySide6.QtCore import QObject, Signal, QTimer  # Qt Signals für Thread-Sicherheit
-from PySide6.QtWidgets import QFileDialog  # Qt FileDialog
+from PySide6.QtCore import QObject, Signal
+from PySide6.QtWidgets import QFileDialog
 
 from Process.search_process import SearchProcess
 from Service.explorer_service import ExplorerService
@@ -72,7 +72,7 @@ class MainPageController(QObject):  # QObject für Signal-Support
         self.clear_results_signal.connect(view.clear_results)
         self.update_progress_signal.connect(view.set_progress)
         self.update_path_signal.connect(view.update_path_label)
-        self.show_status_signal.connect(view.show_status)
+
         self.search_finished_signal.connect(view.sort_results)
         self.search_finished_signal.connect(view.refresh_results_display)
         self.matches_count_signal.connect(view.set_matches_count)
@@ -92,9 +92,9 @@ class MainPageController(QObject):  # QObject für Signal-Support
         if pfad:
             self.process_selected_path(pfad)
 
-
+    # clean path and cache cleanup
     def process_selected_path(self, pfad):
-        """Normalisiert den Pfad plattformabhängig und speichert ihn"""
+        """Normalize Path and clear cache"""
         # Plattformabhängige Pfadnormalisierung mit platform
         if platform.system() == "Windows":
             # Windows: Backslashes und ESCAPEN für Python-Strings!
@@ -105,7 +105,11 @@ class MainPageController(QObject):  # QObject für Signal-Support
 
         self.update_path_signal.emit(pfad)
         self.path_selected_ui = pfad
-        self.all_files_cache = []
+        if self.clear_cache():
+            print("cashe cleanup done")
+        else:
+            print("❌ cache cleanup failed")
+
 
 
     def search(self, event=None):
@@ -119,18 +123,18 @@ class MainPageController(QObject):  # QObject für Signal-Support
             if ProjectData.default_search_path:
                 self.process_selected_path(ProjectData.default_search_path)
             else:
-                print("kein Pfad ausgewählt")
+                print("No path selected")
                 self.no_path_selected_signal.emit()
                 return
 
 
         if not keywords:
-            print("gib einen Suchberiff ein")
+            print("No keywords entered.Type some into the input field.")
             return
 
         if self.search_thread and self.search_thread.is_alive():
-            print("Vorherige Suche läuft noch!")
-            print("wird abgebrochen...")
+            print("Last search is running...")
+            print("Cancelling previous search...")
             self.cancel_thread_event.set()  # beendet den thread hier nicht stellt nur Ampel auf Stop
             self.search_thread.join(timeout=1)
 
@@ -149,7 +153,7 @@ class MainPageController(QObject):  # QObject für Signal-Support
             daemon=True
         )
         self.search_thread.start()  # Startet den Thread erst
-        print(f"🔍 Suche nach '{keywords}' gestartet...")
+        print(f"🔍 START search for '{keywords}' ...")
 
     def _run_search_thread_multiprocessing(self, keywords, search_depth, cancel_thread_event):
         """
@@ -157,22 +161,23 @@ class MainPageController(QObject):  # QObject für Signal-Support
             Sammelt Dateien, filtert Namen, verteilt Content-Suche auf Prozesse
         """
         try:
-            # Dateien sammeln (mit Cache)
+            # Collecting all file paths. If not path choose in GUI is done then take cache
             if not self.all_files_cache:
-                print("sammle pfade")
+                print("start cashing...")
+                print("Collecting all files in selected path ...")
                 all_files = self._collect_files()
                 self.all_files_cache = all_files
                 print("Pfade sammeln erledigt")
             else:
                 all_files = self.all_files_cache
-                print("verwende cache auch letzter Suche für Path")
+                print("Using cached files from the last search")
 
             if not all_files:
-                print("Keine Dateien gefunden")
+                print("No files found in selected path")
                 return
 
             total_files = len(all_files)
-            print(f"Search Thread: {total_files} Dateien werden auf {self.num_processes} CPU Kernen bearbeitet...")
+            print(f"{total_files} files will be processed on {self.num_processes} CPU cores...")
 
             # Dateinamen-Filter (superschnell)
             filepath_matches_set = set(self.explorer_service.filter_files_by_name(all_files, keywords))  # Set zerstört Dublikate hier sollten aber onehin keine sein
@@ -182,7 +187,7 @@ class MainPageController(QObject):  # QObject für Signal-Support
             for match in filepath_matches_set:
                 if cancel_thread_event.is_set():  # Wenn Stop kommt, dann soll Thread nicht weiter arbeiten
                     print(
-                        "abbrechen " + threading.current_thread().name + "in for Schleife for dateipfad in filepath_matches_set ...")
+                        "Cancel Thread" + threading.current_thread().name + "...")
                     return
                 abs_path = os.path.abspath(match[1])
                 filename = os.path.basename(match[1])
@@ -190,7 +195,7 @@ class MainPageController(QObject):  # QObject für Signal-Support
                 self.matches += 1
                 self.matches_count_signal.emit(self.matches)
                 # DIREKTES Signal - sofortige Anzeige!
-                self.add_result_signal.emit(match[0], filename, f"Fundort: {rel_path}", "filename", abs_path)
+                self.add_result_signal.emit(match[0], filename, f"Path: {rel_path}", "filename", abs_path)
 
             # Dateien für Content-Suche
             files_content_search = [f for f in all_files if f not in filepath_matches_set]
@@ -226,18 +231,18 @@ class MainPageController(QObject):  # QObject für Signal-Support
                     results.append(result)
 
                 # Progress-Tracking
-                inhalt_treffer = 0
                 letzter_progress = -1
 
                 # Schnellere Queue-Verarbeitung Result ist eine async ops deshalb müssen wir auf ready warten
                 while any(not r.ready() for r in results) or not progress_queue.empty():
                     if cancel_thread_event.is_set():
-                        print("❌ ABBRUCH - Alle Prozesse werden beendet!")
+                        print("❌ CANCEL - Stop all Processes!")
                         pool.terminate()
                         pool.join()
                         return
 
                     try:
+
                         # Manager queue sehen alle darum Manager = Prozess übergreifende resource Werte kommen aus der static methode ganz oben
                         msg = progress_queue.get(timeout=0.05)
                         if msg[0] == 'progress':
@@ -263,16 +268,24 @@ class MainPageController(QObject):  # QObject für Signal-Support
                             self.matches_count_signal.emit(self.matches)
                             self.add_result_signal.emit(priority, filename, text, "content", abs_path)  # ✨ AN DIE GUI!
 
+                        elif msg[0] == 'stats':
+                            stats = msg[1]
+                            print("===========================================")
+                            print(f"Chunk {chunk_id} File Reader Service Statistic")
+                            for key, value in stats.items():
+                                print(f"{key.capitalize():<12}: {value}")
+                            print("===========================================\n")
+
                     except:
                         pass
 
 
                 self.update_progress_signal.emit(100)
-                print(f"✅ FERTIG: {namen_treffer} Dateinamen, {inhalt_treffer} Inhalts-Treffer")
+                print(f"✅ Finished: {namen_treffer} filename matches, {self.matches} content matches")
                 self.search_finished_signal.emit(True)
 
         except Exception as e:
-            print(f"❌ Fehler: {e}")
+            print(f"❌ Exception: {e}")
             import traceback
             traceback.print_exc()
 
@@ -280,7 +293,7 @@ class MainPageController(QObject):  # QObject für Signal-Support
 
     def cancel_search(self):
         self.cancel_thread_event.set()
-        print("Suche wird abgebrochen...")
+        print("Stop searching...")
 
     def reset_progress_bar(self):
         if self.view:
@@ -288,3 +301,7 @@ class MainPageController(QObject):  # QObject für Signal-Support
 
     def clear_cache(self):
         self.all_files_cache = []
+        if not self.all_files_cache:
+            return True
+        else:
+            return False

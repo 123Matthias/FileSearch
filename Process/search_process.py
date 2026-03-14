@@ -48,6 +48,9 @@ class SearchProcess:
                     if verarbeitet_im_chunk % 5 == 0 or verarbeitet_im_chunk == chunk_size:
                         progress_queue.put(('progress', chunk_id, verarbeitet_im_chunk, chunk_size))
 
+                stats = reader.get_stats()
+                progress_queue.put(('stats', stats))
+
             return []
 
         except Exception as e:

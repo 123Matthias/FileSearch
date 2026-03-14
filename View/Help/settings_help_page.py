@@ -68,6 +68,26 @@ class SettingsHelpPage(QDialog):
         scroll_layout.setSpacing(15)
         scroll_layout.setContentsMargins(20, 10, 20, 10)
 
+        # Supported Extensions Section
+        ranking_title = QLabel(Language.get_language("SettingsHelpPage", "supported_extensions_title"))
+        ranking_title.setStyleSheet(f"""
+            font-size: 14px;
+            font-weight: bold;
+            color: {colors.Primary.MAIN.name()};
+            margin-top: 5px;
+        """)
+        scroll_layout.addWidget(ranking_title)
+
+        ranking_text = QLabel(Language.get_language("SettingsHelpPage", "supported_extensions"))
+        ranking_text.setWordWrap(True)
+        ranking_text.setStyleSheet(f"""
+            font-size: 12px;
+            color: {colors.Text.SECONDARY.name()};
+            line-height: 1.4;
+            padding-left: 10px;
+        """)
+        scroll_layout.addWidget(ranking_text)
+
         # Ranking Section
         ranking_title = QLabel(Language.get_language("SettingsHelpPage", "ranking_title"))
         ranking_title.setStyleSheet(f"""

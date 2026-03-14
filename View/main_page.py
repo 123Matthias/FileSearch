@@ -510,26 +510,6 @@ class MainPage(QMainWindow):
             self.console_visible = False
             self.console_toggle_btn.setChecked(False)
 
-    def set_search_loading(self, is_loading: bool):
-        """Loading-Status anzeigen/verstecken"""
-        if hasattr(self, 'loading_label'):  # <-- Sicherheitscheck
-            if is_loading:
-                self.loading_label.setText("🔄 Suche läuft...")  # <-- loading_label
-                self.loading_label.setVisible(True)
-                self.progress_bar.setValue(0)
-            else:
-                self.loading_label.setVisible(False)
-
-    def show_status(self, message, typ="info"):
-        """Status anzeigen (angepasst für PySide)"""
-        status_text = f"[{typ.upper()}] {message}"
-        print(status_text)
-
-        if typ == "error" and hasattr(self, 'loading_label'):
-            self.loading_label.setText(f"❌ {message}")  # <-- loading_label
-            self.loading_label.setVisible(True)
-            # Auto-hide nach 5 Sekunden
-            QTimer.singleShot(5000, lambda: self.loading_label.setVisible(False))
 
     def add_result(self, priority, title, body, treffer_typ, abs_path):
         """Ergebnis als moderne Karte hinzufügen"""
@@ -599,7 +579,7 @@ class MainPage(QMainWindow):
         self.results_scroll.repaint()
 
         # Optional: Kleines Debug
-        print(f"📊 Ergebnisse neu gerendert: {self.matches_count} Karten")
+        print(f"Refreshing UI finished")
 
     def sort_results(self):
         # Alle Cards sortieren
@@ -785,11 +765,11 @@ class MainPage(QMainWindow):
         # RICHTIG: Path-Objekt erstellen und absolut machen
         path = Path(path).resolve()  # oder .absolute()
 
-        print(f"Absoluter Pfad: {path}")
+        print(f"Absolut Path: {path}")
 
         # Prüft ob etwas existiert (Datei ODER Verzeichnis)
         if not path.exists():
-            print(f"❌ Pfad existiert nicht: {path}")
+            print(f"❌ Path not found: {path}")
             return
 
         try:
@@ -800,9 +780,9 @@ class MainPage(QMainWindow):
             else:  # Linux
                 subprocess.run(["xdg-open", str(path)])
 
-            print(f"✅ Öffne: {path}")
+            print(f"open: {path}")
         except Exception as e:
-            print(f"❌ Fehler beim Öffnen: {e}")
+            print(f"❌ can't open: {e}")
 
 
     def clear_results(self):
@@ -828,19 +808,6 @@ class MainPage(QMainWindow):
             QTimer.singleShot(0, lambda: _clear())
 
 
-
-    def show_status(self, message, typ="info"):
-        """Status anzeigen (angepasst für PySide)"""
-        status_text = f"[{typ.upper()}] {message}"
-        print(status_text)
-
-        # Optional: Zeige Status in der Konsole an
-        if typ == "error":
-            self.search_label.setText(f"❌ {message}")
-            self.search_label.setVisible(True)
-            # Auto-hide nach 5 Sekunden
-            QTimer.singleShot(5000, lambda: self.search_label.setVisible(False))
-
     def set_progress(self, value):
         """Fortschrittsbalken aktualisieren"""
         self.progress_bar.setValue(int(value))
@@ -851,7 +818,7 @@ class MainPage(QMainWindow):
 
 
 
-    # ===== ALLE UPDATE METHODEN FÜR EINZELNE WIDGETS =====
+    # ======================= UPDATE UI STYLES    =======================================
 
     def update_key_label_style(self):
         """Aktualisiert den Key-Label Style"""
@@ -898,7 +865,8 @@ class MainPage(QMainWindow):
                     font-size: 16px;
                     padding: 10px 4px;
                     border-radius: 20px;
-                    max-width: 50px;
+                    min-width: 25px;
+                    max-width: 85px;
                     
                 }}
                 QLineEdit:focus {{
@@ -1112,7 +1080,6 @@ class MainPage(QMainWindow):
 
     def update_all_widgets_style(self):
         """Aktualisiert ALLE Widget-Styles mit den aktuellen Farben"""
-        print("🔄 Aktualisiere alle Widget-Styles...")
 
         # Zuerst globales Stylesheet
         self.update_global_style()
@@ -1135,15 +1102,11 @@ class MainPage(QMainWindow):
         self.update_console_label_style()
         self.update_footer_style()
 
-        print("✅ Alle Widget-Styles aktualisiert")
-
-        # Debug
-
-        print(f"✅ UI aktualisiert mit {self.theme_manager._current_theme} Theme")
+        print("✅ UI Style Update finished")
 
     def on_theme_changed(self):
         """Wird bei Theme-Wechsel automatisch aufgerufen"""
-        print("🎨 MainPage: Theme wurde geändert, aktualisiere UI...")
+        print("Changing theme color...")
 
         # Neue Farben holen
         self.colors = self.theme_manager.get_colors()
