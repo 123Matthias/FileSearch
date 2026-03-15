@@ -22,9 +22,10 @@ class DarkColors:
         INPUT_HIGHLIGHT = QColor("#00bc8c")  # Input Hervorhebung - Grün
 
         CONTAINER_BG = QColor("#1e1e1e")  # Hauptcontainer - Sehr dunkles Grau
+        MESSAGES_BG = QColor("#3d3d3d")  # Input Hintergrund - Dunkelgrau
         CARD_BG = QColor("#2d2d2d")  # Karten/Widgets - Dunkelgrau
-        CARD_BG_GRADIENT_START = QColor("#1c1c1c")  # Card Gradient Start - Fast Schwarz
-        CARD_BG_GRADIENT_END = QColor("#1a1a1a")  # Card Gradient End - Noch dunkler
+        CARD_BG_GRADIENT_START = QColor("#2c2c2c")  # Card Gradient Start - Fast Schwarz
+        CARD_BG_GRADIENT_END = QColor("#292929")  # Card Gradient End - Noch dunkler
         TOOLBAR_BG = QColor("#252525")  # Toolbar - Dunkelgrau
         SPLITTER_HANDLE = QColor("#2c2c2c")  # Splitter - Dunkelgrau
         SPLITTER_HANDLE_HOVER = QColor("#3c3c3c")  # Splitter Hover - Hellgrau
@@ -58,6 +59,7 @@ class LightColors:
         INPUT_HIGHLIGHT = QColor("#006650")  # Input Hervorhebung - Dunkelgrün
 
         CONTAINER_BG = QColor("#f5f5f5")  # Sehr helles Grau - Hauptcontainer
+        MESSAGES_BG = QColor("#f0f0f0")  # Input Hintergrund - Dunkelgrau
         CARD_BG = QColor("#ffffff")  # Reinweiß - Kartenhintergrund
         CARD_BG_GRADIENT_START = QColor("#f0f0f0")  # Card Gradient Start - Hellgrau (vorher #fafafa)
         CARD_BG_GRADIENT_END = QColor("#e8e8e8")    # Card Gradient End - Mittelgrau (vorher #f0f0f0)

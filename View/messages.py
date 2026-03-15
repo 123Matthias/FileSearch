@@ -177,7 +177,7 @@ class Messages:
 
         container.setStyleSheet(f"""
             QWidget {{
-                background-color: {colors.UI.CONTAINER_BG.name()};
+                background-color: {colors.UI.MESSAGES_BG.name()};
                 border: 1px solid {colors.Primary.MAIN.name()};
                 border-radius: 8px;
                 padding: 5px 5px 5px 5px;

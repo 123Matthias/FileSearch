@@ -279,6 +279,7 @@ class MainPageController(QObject):  # QObject für Signal-Support
 
                         elif msg[0] == 'stats':
                             stats = msg[1]
+                            chunk_id = msg[2]
                             print("===========================================")
                             print(f"Chunk {chunk_id} File Reader Service Statistic")
                             for key, value in stats.items():

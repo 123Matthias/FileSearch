@@ -1,6 +1,14 @@
 .idea/
 test/
 
+# pyinstaller
+dist/
+build/
+# Bauplan pyinstaller
+*.spec
+*.dmg
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

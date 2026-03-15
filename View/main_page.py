@@ -244,7 +244,7 @@ class MainPage(QMainWindow):
         self.colors = self.theme_manager.get_colors()
 
         # Fenster-Setup
-        self.setWindowTitle("KeySearch")
+        self.setWindowTitle("SelfSearch")
         self.setMinimumSize(1000, 700)
 
         self.menu_bar = MenuBar(self)
@@ -320,7 +320,7 @@ class MainPage(QMainWindow):
         title_layout.setContentsMargins(0, 0, 0, 0)
 
         colors = ThemeManager().get_colors()
-        self.key_label = QLabel("Key")
+        #self.elf_label = QLabel("elf")
 
         s_label = QLabel()
         s_label.setPixmap(QPixmap("assets/img/pythonFett.png").scaled(
@@ -329,13 +329,12 @@ class MainPage(QMainWindow):
             Qt.SmoothTransformation
         ))
 
-        self.earch_label = QLabel("earch")
+        self.search_label = QLabel(".search")
 
 
-        title_layout.addWidget(self.key_label)
-        title_layout.addWidget(self.key_label)
         title_layout.addWidget(s_label)
-        title_layout.addWidget(self.earch_label)
+        #title_layout.addWidget(self.elf_label)
+        title_layout.addWidget(self.search_label)
         title_layout.addStretch()
 
         header_layout.addWidget(title_widget)
@@ -440,9 +439,9 @@ class MainPage(QMainWindow):
 
         self.splitter.addWidget(self.results_scroll)
         self.splitter.addWidget(self.console_container)
-        self.splitter.setSizes([500, 200])
-        self.splitter.setHandleWidth(8)
-
+        # Splitter konfigurieren - RICHTIG!
+        self.splitter.setHandleWidth(1)  # Ganz dünn
+        self.splitter.setSizes([600, 100])
 
         parent_layout.addWidget(self.splitter)
 
@@ -479,21 +478,26 @@ class MainPage(QMainWindow):
     def setup_console_area(self):
         """Konsolen-Bereich mit besseres Layout"""
         self.console_container = QWidget()
+
+        # 🔥 Feste Höhe für den Container
+        self.console_container.setMinimumHeight(100)  # Mindestens 100px
+        self.console_container.setMaximumHeight(300)  # Maximal 300px
+        # oder feste Höhe:
+        # self.console_container.setFixedHeight(150)   # EXAKT 150px
+
         console_layout = QVBoxLayout(self.console_container)
         console_layout.setContentsMargins(0, 0, 0, 0)
         console_layout.setSpacing(0)
 
         # Konsolen-Label mit Icon
         console_label = QLabel("📟 Konsole")
-
         console_layout.addWidget(console_label)
 
         # GUIConsole direkt einbetten
-        self.console = GUIConsole(self.console_container, height=12)
+        self.console = GUIConsole(self.console_container)
         self.console.redirect()
         console_layout.addWidget(self.console)
 
-        # Stelle sicher, dass die Console beim Schließen restored wird
         self.destroyed.connect(self.console.restore)
 
     def update_values_UI(self):
@@ -820,10 +824,10 @@ class MainPage(QMainWindow):
 
     # ======================= UPDATE UI STYLES    =======================================
 
-    def update_key_label_style(self):
+    def update_elf_label_style(self):
         """Aktualisiert den Key-Label Style"""
-        if hasattr(self, 'key_label'):
-            self.key_label.setStyleSheet(f"""
+        if hasattr(self, 'elf_label'):
+            self.elf_label.setStyleSheet(f"""
                 font-size: 36px;
                 font-weight: bold;
                 color: {self.colors.Primary.MAIN.name()};
@@ -833,8 +837,8 @@ class MainPage(QMainWindow):
 
     def update_earch_label_style(self):
         """Aktualisiert den earch-Label Style"""
-        if hasattr(self, 'earch_label'):
-            self.earch_label.setStyleSheet(f"""
+        if hasattr(self, 'search_label'):
+            self.search_label.setStyleSheet(f"""
                 font-size: 36px;
                 font-weight: bold;
                 color: {self.colors.Secondary.MAIN.name()};
@@ -1086,7 +1090,7 @@ class MainPage(QMainWindow):
 
 
         # Dann alle Einzel-Widgets
-        self.update_key_label_style()
+        self.update_elf_label_style()
         self.update_earch_label_style()
         self.update_search_depth_style()
         self.update_search_icon_style()

@@ -49,7 +49,7 @@ class SearchProcess:
                         progress_queue.put(('progress', chunk_id, verarbeitet_im_chunk, chunk_size))
 
                 stats = reader.get_stats()
-                progress_queue.put(('stats', stats))
+                progress_queue.put(('stats', stats, chunk_id))
 
             return []
 

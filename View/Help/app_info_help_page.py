@@ -28,7 +28,7 @@ class AppInfoHelpPage(QDialog):
         """)
 
         # App Name
-        title = QLabel("KeySearch")
+        title = QLabel("SelfSearch")
         title.setStyleSheet(f"""
             font-size: 24px; 
             font-weight: bold; 
@@ -38,7 +38,7 @@ class AppInfoHelpPage(QDialog):
         layout.addWidget(title)
 
         # Version
-        version = QLabel("0.0.0 beta")
+        version = QLabel("0.0.0 alpha")
         version.setStyleSheet(f"""
             font-size: 11px; 
             color: {colors.Text.SECONDARY.name()};
@@ -85,7 +85,7 @@ class AppInfoHelpPage(QDialog):
             github_logo.setStyleSheet(f"font-size: 16px; color: {colors.Text.SECONDARY.name()};")
 
         # GitHub Text
-        github_text = "https://github.com/123Matthias/KeySearch"
+        github_text = "https://github.com/123Matthias/selfSearch"
         github_link = QLabel(f"{github_text}")
         github_link.setStyleSheet(f"""
             font-size: 11px;
@@ -105,7 +105,7 @@ class AppInfoHelpPage(QDialog):
 
         # Klick-Event für den ganzen Container
         github_container.mousePressEvent = lambda e: QDesktopServices.openUrl(
-            QUrl("https://github.com/123Matthias/KeySearch"))
+            QUrl("https://github.com/123Matthias/selfSearch"))
 
         github_layout.addWidget(github_container)
         layout.addLayout(github_layout)

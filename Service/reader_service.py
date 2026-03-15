@@ -54,6 +54,7 @@ class ReaderService:
         self.stats = {
             'success': 0,
             'failed': 0,
+            'not_found': 0,
             'unsupported': 0
         }
 
@@ -79,7 +80,7 @@ class ReaderService:
         safe_path = path.as_posix()
 
         if not os.path.exists(safe_path):
-            print(f"❓ File not found: {safe_path}")
+            self.increment_stats_thread_save('not_found',1)
             return None
 
         ext = os.path.splitext(filepath)[1].lower()
@@ -125,7 +126,6 @@ class ReaderService:
             return text
 
         except Exception as e:
-            print(f"❌ Can't read: {filepath}: {e}")
             self.increment_stats_thread_save('failed',1)
             return None
 

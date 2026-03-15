@@ -6,10 +6,16 @@ import sys
 class FontAwesomeService:
 
     @staticmethod
+    def resource_path(relative_path):
+        """Pfad richtig auflösen, auch in PyInstaller-Bundle"""
+        base_path = getattr(sys, "_MEIPASS", os.path.abspath("."))
+        return os.path.join(base_path, relative_path)
+
+    @staticmethod
     def load_font_awesome_free():
         # Absoluter Pfad von dieser Datei aus
         file_dir = os.path.dirname(os.path.abspath(__file__))
-        font_path = os.path.join(file_dir, "../assets/fa-7-Free-Solid-900.otf")
+        font_path = FontAwesomeService.resource_path("assets/fa-7-Free-Solid-900.otf")
 
         font_path = os.path.abspath(font_path)  # sicherer absoluter Pfad
 
@@ -40,6 +46,8 @@ class FontAwesomeService:
         pxthon_self_font = QFont(family, 16)
         print(f"✅ Geladene Font-Familien: {family}")
         return pxthon_self_font
+
+
 
 
 

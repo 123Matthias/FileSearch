@@ -29,8 +29,8 @@ Ein Release zum Installieren sollte es bis 04 2026 geben.
 
 ## Screenshot App Main Page
 ### PySide (enthällt auch QSS zum Stylen) und wird für die App jetzt verwendet
-![PySideDesign.png](PySideDesignDark.png)
-![PySideDesignConsoleEnabled.png](PySideDesignDarkKonsole.png)
-![PySideDesign.png](PySideDesignLight.png)
+![PySideDesign.png](assets/img/PySideDesignDark.png)
+![PySideDesignConsoleEnabled.png](assets/img/PySideDesignDarkKonsole.png)
+![PySideDesign.png](assets/img/PySideDesignLight.png)
 ### bootstrapttk Design wird nicht mehr verwendet für die App
-![exampleApp.png](bootstrapttkDesign.png)
+![exampleApp.png](assets/img/bootstrapttkDesign.png)

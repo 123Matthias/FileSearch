@@ -1,3 +1,5 @@
+import multiprocessing
+import os
 import sys
 from PySide6.QtWidgets import QApplication
 from Controller.main_page_controller import MainPageController
@@ -7,6 +9,19 @@ from View.theme_manager import ThemeManager
 from project_data import ProjectData
 from language import Language
 from settings import Settings
+
+# Auf das Verzeichnis der EXE/App wechseln
+if getattr(sys, 'frozen', False):
+    # Wir sind in einer PyInstaller-Binary
+    # Gehe von MacOS/ nach Resources/
+    base_path = os.path.dirname(sys.executable)
+    work_path = os.path.join(base_path, '..', 'Resources')
+    os.chdir(work_path)
+    print(f"✅ Arbeitsverzeichnis: {work_path}")  # Zum Debuggen
+else:
+    # Wir sind im Entwicklungsmodus
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    print(f"✅ Entwicklungsmodus: {os.getcwd()}")
 
 
 class Main:
@@ -41,10 +56,12 @@ class Main:
 
 
 if __name__ == "__main__":
+    # PyInstaller startet sonst startet er mehrere Instanzen der App!
+    multiprocessing.freeze_support()
 
     app = QApplication(sys.argv)
-    app.setApplicationName("KeySearch")
-    app.setApplicationDisplayName("KeySearch")
+    app.setApplicationName("SelfSearch")
+    app.setApplicationDisplayName("SelfSearch")
 
     main_app = Main(app)
     sys.exit(main_app.run())
