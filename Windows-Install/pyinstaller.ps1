@@ -18,10 +18,10 @@ function Build-App {
     # Python-Dateien im Hauptverzeichnis
     $PyFiles = "main.py","settings.py","language.py","project_data.py"
 
-    # Hidden Imports
+    # NUR die Module aus dem .sh Script!
     $Imports = @(
         "fitz",
-        "python-docx",
+        "docx",
         "openpyxl",
         "pptx",
         "psutil",
@@ -29,9 +29,7 @@ function Build-App {
         "PySide6",
         "PySide6.QtCore",
         "PySide6.QtGui",
-        "PySide6.QtWidgets",
-        "PySide6.QtNetwork",
-        "json"
+        "PySide6.QtWidgets"
     )
 
     # Basis-Befehl als Array
@@ -66,15 +64,14 @@ function Build-App {
         }
     }
 
-    # Hidden Imports hinzufuegen
+    # NUR die Imports aus dem .sh Script
     foreach ($imp in $Imports) {
         $Args += "--hidden-import"
         $Args += $imp
+        Write-Host "  + Import: $imp"
     }
 
-    # Windows-spezifische Zusaetze
-    $Args += "--collect-all", "PySide6"
-    $Args += "--collect-all", "fitz"
+    # Windows-spezifische Zusaetze - KEINE collect-all mehr!
     $Args += "--clean"
     $Args += "main.py"
 
