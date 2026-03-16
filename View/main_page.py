@@ -244,7 +244,7 @@ class MainPage(QMainWindow):
         self.colors = self.theme_manager.get_colors()
 
         # Fenster-Setup
-        self.setWindowTitle("SelfSearch")
+        self.setWindowTitle("Search")
         self.setMinimumSize(1000, 700)
 
         self.menu_bar = MenuBar(self)
@@ -329,7 +329,7 @@ class MainPage(QMainWindow):
             Qt.SmoothTransformation
         ))
 
-        self.search_label = QLabel(".search")
+        self.search_label = QLabel("earch")
 
 
         title_layout.addWidget(s_label)

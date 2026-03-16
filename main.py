@@ -60,8 +60,8 @@ if __name__ == "__main__":
     multiprocessing.freeze_support()
 
     app = QApplication(sys.argv)
-    app.setApplicationName("SelfSearch")
-    app.setApplicationDisplayName("SelfSearch")
+    app.setApplicationName("Search")
+    app.setApplicationDisplayName("Search")
 
     main_app = Main(app)
     sys.exit(main_app.run())
