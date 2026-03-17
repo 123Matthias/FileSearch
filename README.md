@@ -36,7 +36,7 @@ You can remove this folder manually after uninstalling the app.
 ## Current Status
 
 - Alpha release available
-- Code review & documentation in progress
+- Code refactoring & documentation in progress
 
 ## Screenshots
 
